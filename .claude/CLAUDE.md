@@ -21,14 +21,14 @@ committed; every file in `.claude/rules/` is loaded automatically).
   loaded eagerly into the same bundle. `src/card-helpers.ts` – loads
   `window.loadCardHelpers()` once. `src/types.ts` – config and the few Home
   Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
-- `src/localize.ts` + `src/translations/*.json` – editor translations (en,
-  nb; nn uses nb), as in simple-weather-card.
+- No translation files: the editor's three labels come from Home
+  Assistant's own translations (`hass.localize`), see `LABELS` in
+  `src/editor.ts`.
 - `test/` – Node test runner. `card.test.mjs` and `editor.test.mjs` load the **built** bundle in
   happy-dom, with fake `hui-*-stack-card`, `hui-card` and `test-card`
   elements and a fake `hui-stack-card-editor` from `helpers.mjs` shaped
   like Home Assistant's, so `yarn build`
-  before `yarn test`. `next-version.test.mjs` tests the release script, `translations.test.mjs`
-  that every language has the keys of `en.json`.
+  before `yarn test`. `next-version.test.mjs` tests the release script.
 - `.github/workflows/` – build (typecheck, lint, formatting, build, test,
   artifact), release (manual button), labeler, HACS validation.
 - `dev/` – local Home Assistant in Docker for manual testing.
@@ -94,7 +94,12 @@ Use these instead of doing the steps by hand; they hold the details.
   the title and the cards. The stack editor validates with superstruct and
   rejects unknown options, so it only gets
   `{ type: "<mode>-stack", title, cards }`; its `config-changed` is stopped
-  and merged into the full config. `mode` is only stored when horizontal;
+  and merged into the full config. The mode field is labelled with HA's
+  "Layout" (`ui.panel.lovelace.editor.edit_view.type`; "Oppsett" in nb) and
+  the stack names (`card.vertical-stack.name`, `card.horizontal-stack.name`),
+  with English fallbacks. They are in HA's `lovelace` translation fragment,
+  which can load after the editor, so the schema is rebuilt when
+  `hass.localize` changes. `mode` is only stored when horizontal;
   `keep` from the original card is removed on any change.
 - Card picker: `preview: true` in `window.customCards`, and
   `getStubConfig(hass, entities, entitiesFallback)` returns a
@@ -109,6 +114,9 @@ Use these instead of doing the steps by hand; they hold the details.
   rounded corners, shadow or spacing of the cards inside (the original
   card's `keep` and `--keep-background`/`--keep-border` were removed on
   purpose, 2026-11-25). `keep` in old configs is ignored, not an error.
+- No translation files of our own: the editor uses Home Assistant's
+  translations, which cover every language. Add own translations only if
+  the editor gets text HA has no string for.
 
 ## Home Assistant specifics
 

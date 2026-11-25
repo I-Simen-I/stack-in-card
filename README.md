@@ -53,7 +53,7 @@ Add **Stack In Card** from the card picker; it starts with a weather card above 
 
 ### Visual editor
 
-The editor has the direction (vertical or horizontal), the title and the cards, with the same tabs as Home Assistant's own stacks to add, move, copy and delete cards and edit each one. The editor is in English and Norwegian.
+The editor has the layout (vertical or horizontal stack), the title and the cards, with the same tabs as Home Assistant's own stacks to add, move, copy and delete cards and edit each one. It's in your Home Assistant language.
 
 ### YAML
 

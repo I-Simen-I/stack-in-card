@@ -2,7 +2,6 @@ import { LitElement, PropertyValues, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
 import { loadCardHelpers } from "./card-helpers";
-import { localize } from "./localize";
 import { HomeAssistant, LovelaceCardConfig, StackInCardConfig } from "./types";
 
 const fireEvent = (node: EventTarget, type: string, detail?: unknown): void => {
@@ -12,6 +11,20 @@ const fireEvent = (node: EventTarget, type: string, detail?: unknown): void => {
 };
 
 type Translate = (key: string) => string;
+
+// Labels from Home Assistant's own translations, so the editor speaks every
+// language Home Assistant does. English if a key is missing.
+const LABELS: Record<string, [key: string, english: string]> = {
+  mode: ["ui.panel.lovelace.editor.edit_view.type", "Layout"],
+  vertical: [
+    "ui.panel.lovelace.editor.card.vertical-stack.name",
+    "Vertical stack",
+  ],
+  horizontal: [
+    "ui.panel.lovelace.editor.card.horizontal-stack.name",
+    "Horizontal stack",
+  ],
+};
 
 // Home Assistant's editor for its stacks: tabs per card, add, move, copy,
 // cut and delete, and the visual editor of each card
@@ -41,7 +54,7 @@ const buildSchemas = (t: Translate) => ({
           mode: "list",
           options: ["vertical", "horizontal"].map((value) => ({
             value,
-            label: t(`modes.${value}`),
+            label: t(value),
           })),
         },
       },
@@ -59,9 +72,10 @@ export class StackInCardEditor extends LitElement {
   @state() private _config?: StackInCardConfig;
   @state() private _stackEditor?: StackEditor;
 
-  // Built once per language. New schema objects on every render would make
+  // Built again only when Home Assistant's translations change (a new
+  // localize function). New schema objects on every render would make
   // ha-form rebuild its fields.
-  private _schemaCache?: { language: string; schemas: Schemas };
+  private _schemaCache?: { localize: unknown; schemas: Schemas };
 
   setConfig(config: StackInCardConfig): void {
     this._config = config;
@@ -127,16 +141,20 @@ export class StackInCardEditor extends LitElement {
     fireEvent(this, "config-changed", { config });
   }
 
-  private _t = (key: string): string => localize(this.hass, key);
+  private _t = (name: string): string => {
+    const [key, english] = LABELS[name];
+    const localize = this.hass?.localize as
+      ((key: string) => string) | undefined;
+    return localize?.(key) || english;
+  };
 
   private _computeLabel = (schema: { name: string }): string =>
-    this._t(`fields.${schema.name}`);
+    this._t(schema.name);
 
   private get _schemas(): Schemas {
-    const locale = this.hass?.locale as { language?: string } | undefined;
-    const language = locale?.language ?? "en";
-    if (this._schemaCache?.language !== language) {
-      this._schemaCache = { language, schemas: buildSchemas(this._t) };
+    const localize = this.hass?.localize;
+    if (!this._schemaCache || this._schemaCache.localize !== localize) {
+      this._schemaCache = { localize, schemas: buildSchemas(this._t) };
     }
     return this._schemaCache.schemas;
   }

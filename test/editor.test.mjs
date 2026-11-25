@@ -88,16 +88,36 @@ test("only stores the mode when it's horizontal", async () => {
   editor.remove();
 });
 
-test("translates the editor", async () => {
-  const { editor } = await createEditor(
-    {},
-    { ...HASS, locale: { language: "nb" } },
-  );
-  const mode = formWith(editor, "mode");
-  assert.equal(mode.computeLabel({ name: "mode" }), "Retning");
-  assert.deepEqual(
-    mode.schema[0].selector.select.options.map((o) => o.label),
-    ["Loddrett", "Vannrett"],
-  );
+// Norwegian, from Home Assistant's own translations
+const NB = {
+  "ui.panel.lovelace.editor.edit_view.type": "Oppsett",
+  "ui.panel.lovelace.editor.card.vertical-stack.name": "Vertikal stabel",
+  "ui.panel.lovelace.editor.card.horizontal-stack.name": "Horisontal stabel",
+};
+
+const modeLabels = (editor) => {
+  const form = formWith(editor, "mode");
+  return [
+    form.computeLabel({ name: "mode" }),
+    ...form.schema[0].selector.select.options.map((o) => o.label),
+  ];
+};
+
+test("uses Home Assistant's translations, and English without them", async () => {
+  const { editor } = await createEditor({}, { ...HASS, localize: () => "" });
+  assert.deepEqual(modeLabels(editor), [
+    "Layout",
+    "Vertical stack",
+    "Horizontal stack",
+  ]);
+
+  // The editor's translations can load later, with a new localize
+  editor.hass = { ...HASS, localize: (key) => NB[key] ?? "" };
+  await editor.updateComplete;
+  assert.deepEqual(modeLabels(editor), [
+    "Oppsett",
+    "Vertikal stabel",
+    "Horisontal stabel",
+  ]);
   editor.remove();
 });

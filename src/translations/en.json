@@ -1,9 +1,0 @@
-{
-  "fields": {
-    "mode": "Direction"
-  },
-  "modes": {
-    "vertical": "Vertical",
-    "horizontal": "Horizontal"
-  }
-}
