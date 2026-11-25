@@ -14,6 +14,7 @@ Group several cards into one card on your [Home Assistant](https://www.home-assi
 
 - **One card from many**: stack any cards vertically or horizontally, and they look like one card
 - **Nested stacks**: horizontal and vertical stacks inside the card are merged too
+- **Visual editor** with Home Assistant's own card tabs
 - **Keep what you want**: background, border, rounded corners, shadow or spacing, for all cards or per card
 - A drop-in replacement for [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card) and `horizontal-stack-in-card`
 
@@ -47,7 +48,15 @@ From Home Assistant 2026.11, HACS is built in as the **Marketplace** (Settings â
 
 ## Configuration
 
-Add **Stack In Card** from the card picker; it starts with a weather card above three buttons side by side. The card has no visual editor; use the code editor and add the cards to stack under `cards`, as you would in a vertical stack.
+Add **Stack In Card** from the card picker; it starts with a weather card above three buttons side by side.
+
+### Visual editor
+
+The editor has the direction (vertical or horizontal), the title and the cards, with the same tabs as Home Assistant's own stacks to add, move, copy and delete cards and edit each one. **Keep the cards' own look** has a switch for each [keep](#keep) option. The editor is in English and Norwegian.
+
+### YAML
+
+Add the cards to stack under `cards`, as you would in a vertical stack.
 
 ```yaml
 type: custom:stack-in-card
@@ -62,7 +71,7 @@ cards:
       - sensor.outside_humidity
 ```
 
-### Card options
+#### Card options
 
 | Name    | Type   | Default    | Description                                            |
 | ------- | ------ | ---------- | ------------------------------------------------------ |
@@ -72,7 +81,7 @@ cards:
 | `title` | string |            | Title above the cards                                  |
 | `keep`  | object |            | What to keep of the cards' own look, see [Keep](#keep) |
 
-### Keep
+#### Keep
 
 By default the cards in the stack lose their background, border, rounded corners, shadow and the space between them. `keep` brings them back for **all** the cards:
 

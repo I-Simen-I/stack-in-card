@@ -17,12 +17,18 @@ committed; every file in `.claude/rules/` is loaded automatically).
 
 ## Layout
 
-- `src/stack-in-card.ts` – the card. `src/types.ts` – config and the few
-  Home Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
-- `test/` – Node test runner. `card.test.mjs` loads the **built** bundle in
+- `src/stack-in-card.ts` – the card. `src/editor.ts` – visual editor,
+  loaded eagerly into the same bundle. `src/card-helpers.ts` – loads
+  `window.loadCardHelpers()` once. `src/types.ts` – config and the few Home
+  Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
+- `src/localize.ts` + `src/translations/*.json` – editor translations (en,
+  nb; nn uses nb), as in simple-weather-card.
+- `test/` – Node test runner. `card.test.mjs` and `editor.test.mjs` load the **built** bundle in
   happy-dom, with fake `hui-*-stack-card`, `hui-card` and `test-card`
-  elements from `helpers.mjs` shaped like Home Assistant's, so `yarn build`
-  before `yarn test`. `next-version.test.mjs` tests the release script.
+  elements and a fake `hui-stack-card-editor` from `helpers.mjs` shaped
+  like Home Assistant's, so `yarn build`
+  before `yarn test`. `next-version.test.mjs` tests the release script, `translations.test.mjs`
+  that every language has the keys of `en.json`.
 - `.github/workflows/` – build (typecheck, lint, formatting, build, test,
   artifact), release (manual button), labeler, HACS validation.
 - `dev/` – local Home Assistant in Docker for manual testing.
@@ -84,6 +90,15 @@ Use these instead of doing the steps by hand; they hold the details.
   card-mod or button-card) keep its background or border.
 - Nested `stack-in-card` elements are skipped; they style themselves.
 - `ll-rebuild` from the stack recreates it.
+- Visual editor: a `mode` form on top, then Home Assistant's own stack
+  editor (`hui-stack-card-editor`, from
+  `customElements.get("hui-vertical-stack-card").getConfigElement()`) for
+  the title and the cards, then an expansion panel with the `keep`
+  switches. The stack editor validates with superstruct and rejects
+  unknown options, so it only gets `{ type: "<mode>-stack", title, cards }`;
+  its `config-changed` is stopped and merged into the full config. `mode`
+  is only stored when horizontal, `keep` switches only when they differ
+  from the default (`outer_padding` follows `margin`).
 - Card picker: `preview: true` in `window.customCards`, and
   `getStubConfig(hass, entities, entitiesFallback)` returns a
   `weather-forecast` card above a `horizontal-stack` of three buttons, with

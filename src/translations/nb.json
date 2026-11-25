@@ -1,0 +1,19 @@
+{
+  "fields": {
+    "mode": "Retning",
+    "background": "Bakgrunn",
+    "border": "Kant",
+    "border_radius": "Avrundede hjørner",
+    "box_shadow": "Skygge",
+    "margin": "Avstand mellom kortene",
+    "outer_padding": "Avstand rundt kortene"
+  },
+  "modes": {
+    "vertical": "Loddrett",
+    "horizontal": "Vannrett"
+  },
+  "sections": {
+    "keep": "Behold kortenes eget utseende"
+  },
+  "keep_help": "Gjelder alle kortene. For å beholde bakgrunnen eller kanten på ett kort, sett --keep-background eller --keep-border til true på det med card-mod."
+}

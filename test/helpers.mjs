@@ -105,7 +105,25 @@ const defineFakeCards = () => {
     },
   );
 
+  // Home Assistant's stack editor, which rejects options it doesn't know
+  customElements.define(
+    "hui-stack-card-editor",
+    class extends HTMLElement {
+      setConfig(config) {
+        const unknown = Object.keys(config).filter(
+          (key) => !["type", "title", "cards"].includes(key),
+        );
+        if (unknown.length) throw new Error(`Unknown options: ${unknown}`);
+        this.config = config;
+      }
+    },
+  );
+
   class FakeStack extends HTMLElement {
+    static async getConfigElement() {
+      return document.createElement("hui-stack-card-editor");
+    }
+
     constructor() {
       super();
       this.attachShadow({ mode: "open" }).innerHTML =
@@ -184,4 +202,38 @@ export const rootOf = (stack) => stack.shadowRoot.getElementById("root");
 export const haCardsOf = (stack) =>
   stack.cards.map((huiCard) =>
     huiCard.firstElementChild.shadowRoot.querySelector("ha-card"),
+  );
+
+// Creates the visual editor and waits until the stack editor is in it
+export const createEditor = async (config, hass = HASS) => {
+  const editor = await customElements.get("stack-in-card").getConfigElement();
+  const configs = [];
+  editor.addEventListener("config-changed", (ev) =>
+    configs.push(ev.detail.config),
+  );
+  editor.hass = hass;
+  editor.lovelace = { views: [] };
+  editor.setConfig({ type: "custom:stack-in-card", cards: CARDS, ...config });
+  document.body.appendChild(editor);
+  await wait(20);
+  await editor.updateComplete;
+  return { editor, configs };
+};
+
+export const stackEditorOf = (editor) =>
+  editor.shadowRoot.querySelector("hui-stack-card-editor");
+
+// The ha-form that has a field with this name
+export const formWith = (editor, name) =>
+  [...editor.shadowRoot.querySelectorAll("ha-form")].find((form) =>
+    form.schema.some((field) => field.name === name),
+  );
+
+export const change = (form, value) =>
+  form.dispatchEvent(
+    new CustomEvent("value-changed", {
+      detail: { value },
+      bubbles: true,
+      composed: true,
+    }),
   );

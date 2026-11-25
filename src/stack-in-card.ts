@@ -1,8 +1,8 @@
 import { LitElement, PropertyValues, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
+import { loadCardHelpers } from "./card-helpers";
 import {
-  CardHelpers,
   HomeAssistant,
   LovelaceCard,
   LovelaceCardConfig,
@@ -12,7 +12,6 @@ import {
 
 declare global {
   interface Window {
-    loadCardHelpers?: () => Promise<CardHelpers>;
     customCards?: Array<{
       type: string;
       name: string;
@@ -32,18 +31,6 @@ const STUB_ICONS = ["mdi:lightbulb", "mdi:power-socket-eu", "mdi:fan"];
 // delay, for cards that render late (custom cards that are still loading)
 // or set `--keep-background` / `--keep-border` late (card-mod).
 const RESTYLE_DELAY = 500;
-
-let cardHelpers: Promise<CardHelpers> | undefined;
-
-const loadCardHelpers = (): Promise<CardHelpers> => {
-  if (!window.loadCardHelpers) {
-    return Promise.reject(
-      new Error("Home Assistant's card helpers are missing"),
-    );
-  }
-  cardHelpers ??= window.loadCardHelpers();
-  return cardHelpers;
-};
 
 // Lit elements, like Home Assistant's cards, render asynchronously
 const afterUpdate = async (element: Element): Promise<void> => {
@@ -78,6 +65,12 @@ export class StackInCard extends LitElement {
       overflow: hidden;
     }
   `;
+
+  // HA's stack editor for the cards, with fields for mode and keep
+  static async getConfigElement(): Promise<HTMLElement> {
+    await import(/* webpackMode: "eager" */ "./editor");
+    return document.createElement("stack-in-card-editor");
+  }
 
   // Shown in the card picker and used as the starting config: a weather
   // card above three buttons side by side, so the preview shows them all
