@@ -167,6 +167,27 @@ test("merges the cards: no background, border, corners, shadow or spacing", asyn
   card.remove();
 });
 
+test("merges the cards from their first paint with HA's CSS variables", async () => {
+  const card = await createCard();
+  const wrapper = card.shadowRoot.querySelector("ha-card > .stack");
+  assert.equal(wrapper.firstElementChild, stackOf(card));
+  const css = customElements.get("stack-in-card").styles.cssText;
+  const rule = /\.stack\s*{([^}]*)}/.exec(css)?.[1] ?? "";
+  for (const [name, value] of [
+    ["--ha-card-background", "transparent"],
+    ["--ha-card-border-width", "0px"],
+    ["--ha-card-border-radius", "0px"],
+    ["--ha-card-box-shadow", "none"],
+    ["--stack-card-gap", "0px"],
+    ["--vertical-stack-card-gap", "0px"],
+    ["--horizontal-stack-card-gap", "0px"],
+    ["--grid-card-gap", "0px"],
+  ]) {
+    assert.match(rule, new RegExp(`${name}:\\s*${value};`), name);
+  }
+  card.remove();
+});
+
 test("merges cards that render late", async () => {
   const card = await createCard();
   const late = document.createElement("hui-card");

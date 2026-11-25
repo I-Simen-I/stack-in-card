@@ -60,9 +60,24 @@ export class StackInCard extends LitElement {
   private _cardPromise?: Promise<LovelaceCard>;
   private _restyleTimer?: number;
 
+  // Home Assistant's cards and stacks read these variables, so they are
+  // merged from their first paint. Setting the styles after they have
+  // rendered (below) shows their borders first, fading out with ha-card's
+  // 0.3s transition. The variables only reach the cards inside, not this
+  // card's own ha-card.
   static styles = css`
     ha-card {
       overflow: hidden;
+    }
+    .stack {
+      --ha-card-background: transparent;
+      --ha-card-border-width: 0px;
+      --ha-card-border-radius: 0px;
+      --ha-card-box-shadow: none;
+      --stack-card-gap: 0px;
+      --vertical-stack-card-gap: 0px;
+      --horizontal-stack-card-gap: 0px;
+      --grid-card-gap: 0px;
     }
   `;
 
@@ -151,7 +166,9 @@ export class StackInCard extends LitElement {
   protected render() {
     if (!this._config || !this._card) return nothing;
     return html`
-      <ha-card header=${this._config.title ?? nothing}>${this._card}</ha-card>
+      <ha-card header=${this._config.title ?? nothing}>
+        <div class="stack">${this._card}</div>
+      </ha-card>
     `;
   }
 
@@ -197,7 +214,9 @@ export class StackInCard extends LitElement {
   // Walks down through stacks and other cards that hold cards, and merges
   // every `ha-card` it finds into this one: no background, border, rounded
   // corners, shadow or space between them. That's the point of the card, so
-  // none of it can be turned off.
+  // none of it can be turned off. The CSS variables in `styles` already do
+  // this for cards that use them; this catches the cards that set their own
+  // styles, like custom cards.
   private async _styleTree(element: Element): Promise<void> {
     await afterUpdate(element);
     const shadow = element.shadowRoot;

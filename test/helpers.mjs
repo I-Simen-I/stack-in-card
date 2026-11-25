@@ -194,7 +194,7 @@ export const createCard = async (config = {}, hass = HASS) => {
 export const restyled = () => wait(RESTYLE_DELAY + 50);
 
 export const stackOf = (card) =>
-  card.shadowRoot.querySelector("ha-card").firstElementChild;
+  card.shadowRoot.querySelector("ha-card > .stack").firstElementChild;
 
 export const rootOf = (stack) => stack.shadowRoot.getElementById("root");
 

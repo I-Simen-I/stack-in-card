@@ -101,7 +101,14 @@ Use these instead of doing the steps by hand; they hold the details.
   It creates a `${mode}-stack` with `window.loadCardHelpers()`
   (`createCardElement`). `hass` and `preview` are passed to the stack when it
   is ready and on every change after that.
-- Styling walks the DOM after each render (`_styleTree`) and again after
+- The stack sits in a `.stack` wrapper that sets HA's CSS variables
+  (`--ha-card-background`, `--ha-card-border-width`,
+  `--ha-card-border-radius`, `--ha-card-box-shadow`, and the stack and grid
+  gaps) to nothing, so cards that use them are merged from their first
+  paint. Don't rely on the DOM walk alone: `ha-card` has
+  `transition: all 0.3s`, so styles set after render show the borders
+  fading out on every page load.
+- As a fallback for cards with their own styles, styling also walks the DOM after each render (`_styleTree`) and again after
   500 ms for cards that render late: in a shadow root it merges the
   `ha-card`, or, in stacks, goes through the `#root` (or `#card`) container
   and its children; in the light DOM (`hui-card`) it goes through the
@@ -158,6 +165,10 @@ frontend repo (`home-assistant/frontend`), especially
   (`--vertical-stack-card-gap`, `--horizontal-stack-card-gap`,
   `--stack-card-gap`, default 8px), not margins.
 - `ha-card` has a border since 2022.11 (`--ha-card-border-width`, 1px).
+  Its look comes from `--ha-card-background`, `--ha-card-border-width`,
+  `--ha-card-border-color`, `--ha-card-border-radius`,
+  `--ha-card-box-shadow` and `--ha-card-backdrop-filter`
+  (`src/components/ha-card.ts`), with `transition: all 0.3s ease-out`.
 - The card depends on this internal DOM. Changes in Home Assistant's frontend
   can break it without any change here; check the test environment against a
   new Home Assistant version when something looks off.
