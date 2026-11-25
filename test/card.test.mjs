@@ -42,6 +42,41 @@ test("registers the card and logs its version", () => {
   );
 });
 
+test("shows three buttons side by side in the card picker", () => {
+  const entry = window.customCards.find((c) => c.type === "stack-in-card");
+  assert.equal(entry.preview, true);
+
+  const Card = customElements.get("stack-in-card");
+  const hass = {
+    states: {
+      "sensor.temperature": {},
+      "light.kitchen": {},
+      "switch.heater": {},
+      "light.bedroom": {},
+      "light.hall": {},
+    },
+  };
+  // The picker passes the entities on the dashboard first, then the rest
+  assert.deepEqual(
+    Card.getStubConfig(hass, ["light.hall", "sensor.temperature"], []),
+    {
+      mode: "horizontal",
+      cards: [
+        { type: "button", entity: "light.hall" },
+        { type: "button", entity: "light.kitchen" },
+        { type: "button", entity: "switch.heater" },
+      ],
+    },
+  );
+
+  // Buttons with only an icon when there are too few lights and switches
+  const stub = Card.getStubConfig({ states: { "light.kitchen": {} } }, [], []);
+  assert.equal(stub.cards.length, 3);
+  assert.deepEqual(stub.cards[0], { type: "button", entity: "light.kitchen" });
+  assert.equal(stub.cards[1].entity, undefined);
+  assert.match(stub.cards[1].icon, /^mdi:/);
+});
+
 test("rejects configs without cards or with an unknown mode", () => {
   const card = document.createElement("stack-in-card");
   assert.throws(

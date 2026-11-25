@@ -1,6 +1,9 @@
-// Only what the card uses. The card passes `hass` on to the stack without
-// reading it.
-export type HomeAssistant = Record<string, unknown>;
+// Only what the card uses. The card passes `hass` on to the stack, and only
+// reads the entity ids for the card picker's preview.
+export interface HomeAssistant {
+  states: Record<string, unknown>;
+  [key: string]: unknown;
+}
 
 export interface LovelaceCardConfig {
   type: string;

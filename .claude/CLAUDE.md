@@ -84,6 +84,11 @@ Use these instead of doing the steps by hand; they hold the details.
   card-mod or button-card) keep its background or border.
 - Nested `stack-in-card` elements are skipped; they style themselves.
 - `ll-rebuild` from the stack recreates it.
+- Card picker: `preview: true` in `window.customCards`, and
+  `getStubConfig(hass, entities, entitiesFallback)` returns three buttons in
+  a horizontal stack, with lights/switches the picker suggests (like HA's
+  button card) or icon-only buttons. It's also the config a new card starts
+  with.
 
 ## Home Assistant specifics
 

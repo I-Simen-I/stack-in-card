@@ -24,6 +24,10 @@ declare global {
 
 const MODES = ["vertical", "horizontal"];
 
+// Buttons in the card picker's preview when there aren't enough lights or
+// switches to show
+const STUB_ICONS = ["mdi:lightbulb", "mdi:power-socket-eu", "mdi:fan"];
+
 // Child cards are styled once they have rendered, and again after this
 // delay, for cards that render late (custom cards that are still loading)
 // or set `--keep-background` / `--keep-border` late (card-mod).
@@ -75,8 +79,30 @@ export class StackInCard extends LitElement {
     }
   `;
 
-  static getStubConfig(): Partial<StackInCardConfig> {
-    return { cards: [] };
+  // Shown in the card picker and used as the starting config: three
+  // buttons side by side, so the preview shows them merged into one card.
+  // Prefers the lights and switches the picker suggests, like HA's button.
+  static getStubConfig(
+    hass?: HomeAssistant,
+    entities: string[] = [],
+    entitiesFallback: string[] = [],
+  ): Partial<StackInCardConfig> {
+    const candidates = [
+      ...entities,
+      ...entitiesFallback,
+      ...Object.keys(hass?.states ?? {}),
+    ];
+    const found = [
+      ...new Set(candidates.filter((id) => /^(light|switch)\./.test(id))),
+    ];
+    return {
+      mode: "horizontal",
+      cards: STUB_ICONS.map((icon, i) =>
+        found[i]
+          ? { type: "button", entity: found[i] }
+          : { type: "button", icon },
+      ),
+    };
   }
 
   set hass(hass: HomeAssistant) {
@@ -247,7 +273,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: "stack-in-card",
   name: "Stack In Card",
-  preview: false,
+  preview: true,
   description: "Group several cards into one card, without borders",
 });
 
