@@ -6,6 +6,7 @@ import {
   HomeAssistant,
   LovelaceCard,
   LovelaceCardConfig,
+  MODES,
   StackInCardConfig,
 } from "./types";
 
@@ -19,8 +20,6 @@ declare global {
     }>;
   }
 }
-
-const MODES = ["vertical", "horizontal"];
 
 // Buttons in the card picker's preview when there aren't enough lights or
 // switches to show

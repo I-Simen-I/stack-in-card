@@ -1,9 +1,12 @@
-// Only what the card uses. The card passes `hass` on to the stack, and only
-// reads the entity ids for the card picker's preview.
+// Only what the card uses. The card passes `hass` on to the stack; it reads
+// the entity ids for the card picker and translations for the editor.
 export interface HomeAssistant {
   states: Record<string, unknown>;
+  localize?: (key: string) => string;
   [key: string]: unknown;
 }
+
+export const MODES = ["vertical", "horizontal"] as const;
 
 export interface LovelaceCardConfig {
   type: string;
@@ -25,6 +28,6 @@ export interface CardHelpers {
 export interface StackInCardConfig {
   type: string;
   title?: string;
-  mode?: "vertical" | "horizontal";
+  mode?: (typeof MODES)[number];
   cards: LovelaceCardConfig[];
 }

@@ -2,7 +2,12 @@ import { LitElement, PropertyValues, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
 import { loadCardHelpers } from "./card-helpers";
-import { HomeAssistant, LovelaceCardConfig, StackInCardConfig } from "./types";
+import {
+  HomeAssistant,
+  LovelaceCardConfig,
+  MODES,
+  StackInCardConfig,
+} from "./types";
 
 const fireEvent = (node: EventTarget, type: string, detail?: unknown): void => {
   node.dispatchEvent(
@@ -52,7 +57,7 @@ const buildSchemas = (t: Translate) => ({
       selector: {
         select: {
           mode: "list",
-          options: ["vertical", "horizontal"].map((value) => ({
+          options: MODES.map((value) => ({
             value,
             label: t(value),
           })),
@@ -95,11 +100,9 @@ export class StackInCardEditor extends LitElement {
     super.updated(changed);
     const editor = this._stackEditor;
     if (!editor || !this._config) return;
-    if (changed.has("hass")) editor.hass = this.hass;
-    if (changed.has("lovelace")) editor.lovelace = this.lovelace;
+    editor.hass = this.hass;
+    editor.lovelace = this.lovelace;
     if (changed.has("_config") || changed.has("_stackEditor")) {
-      editor.hass = this.hass;
-      editor.lovelace = this.lovelace;
       editor.setConfig(this._stackConfig(this._config));
     }
   }
@@ -109,7 +112,7 @@ export class StackInCardEditor extends LitElement {
   private _stackConfig(config: StackInCardConfig): LovelaceCardConfig {
     const stack: LovelaceCardConfig = {
       type: `${config.mode ?? "vertical"}-stack`,
-      cards: config.cards ?? [],
+      cards: config.cards,
     };
     if (config.title) stack.title = config.title;
     return stack;
@@ -143,9 +146,7 @@ export class StackInCardEditor extends LitElement {
 
   private _t = (name: string): string => {
     const [key, english] = LABELS[name];
-    const localize = this.hass?.localize as
-      ((key: string) => string) | undefined;
-    return localize?.(key) || english;
+    return this.hass?.localize?.(key) || english;
   };
 
   private _computeLabel = (schema: { name: string }): string =>
