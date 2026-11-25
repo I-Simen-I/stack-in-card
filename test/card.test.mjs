@@ -42,7 +42,7 @@ test("registers the card and logs its version", () => {
   );
 });
 
-test("shows three buttons side by side in the card picker", () => {
+test("shows a weather card above three buttons in the card picker", () => {
   const entry = window.customCards.find((c) => c.type === "stack-in-card");
   assert.equal(entry.preview, true);
 
@@ -50,31 +50,45 @@ test("shows three buttons side by side in the card picker", () => {
   const hass = {
     states: {
       "sensor.temperature": {},
+      "weather.home": {},
       "light.kitchen": {},
       "switch.heater": {},
       "light.bedroom": {},
       "light.hall": {},
+      "weather.cabin": {},
     },
   };
   // The picker passes the entities on the dashboard first, then the rest
   assert.deepEqual(
-    Card.getStubConfig(hass, ["light.hall", "sensor.temperature"], []),
+    Card.getStubConfig(
+      hass,
+      ["light.hall", "sensor.temperature", "weather.cabin"],
+      [],
+    ),
     {
-      mode: "horizontal",
       cards: [
-        { type: "button", entity: "light.hall" },
-        { type: "button", entity: "light.kitchen" },
-        { type: "button", entity: "switch.heater" },
+        { type: "weather-forecast", entity: "weather.cabin" },
+        {
+          type: "horizontal-stack",
+          cards: [
+            { type: "button", entity: "light.hall" },
+            { type: "button", entity: "light.kitchen" },
+            { type: "button", entity: "switch.heater" },
+          ],
+        },
       ],
     },
   );
 
-  // Buttons with only an icon when there are too few lights and switches
+  // No weather card without a weather entity, and buttons with only an icon
+  // when there are too few lights and switches
   const stub = Card.getStubConfig({ states: { "light.kitchen": {} } }, [], []);
-  assert.equal(stub.cards.length, 3);
-  assert.deepEqual(stub.cards[0], { type: "button", entity: "light.kitchen" });
-  assert.equal(stub.cards[1].entity, undefined);
-  assert.match(stub.cards[1].icon, /^mdi:/);
+  assert.equal(stub.cards.length, 1);
+  const buttons = stub.cards[0].cards;
+  assert.equal(buttons.length, 3);
+  assert.deepEqual(buttons[0], { type: "button", entity: "light.kitchen" });
+  assert.equal(buttons[1].entity, undefined);
+  assert.match(buttons[1].icon, /^mdi:/);
 });
 
 test("rejects configs without cards or with an unknown mode", () => {

@@ -79,29 +79,38 @@ export class StackInCard extends LitElement {
     }
   `;
 
-  // Shown in the card picker and used as the starting config: three
-  // buttons side by side, so the preview shows them merged into one card.
-  // Prefers the lights and switches the picker suggests, like HA's button.
+  // Shown in the card picker and used as the starting config: a weather
+  // card above three buttons side by side, so the preview shows them all
+  // merged into one card. Uses the entities the picker suggests first, like
+  // Home Assistant's own weather and button cards. Without a weather entity
+  // the weather card is left out; without lights or switches the buttons
+  // only show an icon.
   static getStubConfig(
     hass?: HomeAssistant,
     entities: string[] = [],
     entitiesFallback: string[] = [],
   ): Partial<StackInCardConfig> {
     const candidates = [
-      ...entities,
-      ...entitiesFallback,
-      ...Object.keys(hass?.states ?? {}),
+      ...new Set([
+        ...entities,
+        ...entitiesFallback,
+        ...Object.keys(hass?.states ?? {}),
+      ]),
     ];
-    const found = [
-      ...new Set(candidates.filter((id) => /^(light|switch)\./.test(id))),
-    ];
-    return {
-      mode: "horizontal",
+    const weather = candidates.find((id) => id.startsWith("weather."));
+    const switches = candidates.filter((id) => /^(light|switch)\./.test(id));
+    const buttons = {
+      type: "horizontal-stack",
       cards: STUB_ICONS.map((icon, i) =>
-        found[i]
-          ? { type: "button", entity: found[i] }
+        switches[i]
+          ? { type: "button", entity: switches[i] }
           : { type: "button", icon },
       ),
+    };
+    return {
+      cards: weather
+        ? [{ type: "weather-forecast", entity: weather }, buttons]
+        : [buttons],
     };
   }
 

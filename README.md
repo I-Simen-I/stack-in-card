@@ -47,7 +47,7 @@ From Home Assistant 2026.11, HACS is built in as the **Marketplace** (Settings â
 
 ## Configuration
 
-Add **Stack In Card** from the card picker; it starts with three buttons side by side. The card has no visual editor; use the code editor and add the cards to stack under `cards`, as you would in a vertical stack.
+Add **Stack In Card** from the card picker; it starts with a weather card above three buttons side by side. The card has no visual editor; use the code editor and add the cards to stack under `cards`, as you would in a vertical stack.
 
 ```yaml
 type: custom:stack-in-card
