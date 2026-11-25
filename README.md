@@ -1,100 +1,183 @@
-# Stack In Card by [@RomRider](https://www.github.com/RomRider)
+# Stack In Card
 
-A replacement for [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card) and `horizontal-stack-in-card`
+[![Release](https://img.shields.io/github/release/I-Simen-I/stack-in-card?style=for-the-badge)](https://github.com/I-Simen-I/stack-in-card/releases/latest)
+[![Last commit](https://img.shields.io/github/last-commit/I-Simen-I/stack-in-card?style=for-the-badge)](https://github.com/I-Simen-I/stack-in-card/commits/master)
+[![Marketplace](https://img.shields.io/badge/Marketplace%20%2F%20HACS-Custom-orange.svg?style=for-the-badge)](#marketplace-recommended)
 
-It allows to group multiple cards into one card without the borders. By default, it will stack everything vertically.
+Group several cards into one card on your [Home Assistant](https://www.home-assistant.io/) dashboards, without the borders, shadows and gaps between them.
 
-[![GitHub Release][releases-shield]][releases]
-[![License][license-shield]](LICENSE.md)
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+![Stack In Card with an entities card, a glance card and two buttons](docs/Example.png)
 
-![Project Maintenance][maintenance-shield]
-[![GitHub Activity][commits-shield]][commits]
+> A fork of [stack-in-card](https://github.com/custom-cards/stack-in-card) by [@RomRider](https://github.com/RomRider), kept up to date with current Home Assistant releases.
 
-[![Discord][discord-shield]][discord]
-[![Community Forum][forum-shield]][forum]
+## Features
 
-## Options
-
-If a card inside the stack has the `--keep-background` CSS style defined, it will not replace the background. This is usefull for [button-card](https://github.com/custom-cards/button-card) for example. You can also define this CSS variable by using [card-mod](https://github.com/thomasloven/lovelace-card-mod).
-
-| Name | Type | Requirement | Description | Default |
-| ---- | ---- | ----------- | ----------- | ------- |
-| `type` | string  | **Required** | `custom:stack-in-card` | |
-| `title` | string  | **Optional** | Header of the card | |
-| `mode` | string  | **Optional** | `vertical` or `horizontal` stack | `vertical` |
-| `cards` | object  | **Required** | The cards you want to embed | `none` |
-| `keep` | object | **Optional** | See [keep object](#keep-object) | |
-
-### `keep` object
-
-| Name | Type | Requirement | Description | Default |
-| ---- | ---- | ----------- | ----------- | ------- |
-| `background` | boolean | **Optional** | Will keep the background on **all** the child cards. To keep the background on specific cards only, assign the CSS variable `--keep-background: 'true'` on the card where you want to keep the background.  | `false` |
-| `box_shadow` | boolean | **Optional** | Will keep the `box-shadow` on **all** the child cards | `false` |
-| `margin` | boolean | **Optional** | Will keep the `margin` between **all** the child cards | `false` |
-| `outer_padding` | boolean | **Optional** | Will add a `padding` of `8px` to the card if `margin` is `true` | `true` if `margin` is `true`, else false |
-| `border_radius` | boolean | **Optional** | Will keep the `border-radius` on **all** the child cards | `false` |
-
-## Example
-
-### Simple Example
-
-![example](docs/Example.png)
-
-```yaml
-- type: custom:stack-in-card
-  title: My Stack In Card
-  mode: vertical
-  cards:
-    - type: horizontal-stack
-      cards:
-        - type: button
-          entity: sun.sun
-        - type: button
-          entity: sun.sun
-    - type: vertical-stack
-      cards:
-        - type: entities
-          entities:
-            - sun.sun
-```
-
-### Example with button-card to keep the background
-
-This will keep the background of the button even if stacked:
-
-```yaml
-- type: custom:stack-in-card
-  title: My Stack In Card
-  mode: vertical
-  cards:
-    - type: custom:button-card
-      entity: sun.sun
-      color_type: card
-      styles:
-        card:
-          - --keep-background: 'true'
-```
+- **One card from many**: stack any cards vertically or horizontally, and they look like one card
+- **Nested stacks**: horizontal and vertical stacks inside the card are merged too
+- **Keep what you want**: background, border, rounded corners, shadow or spacing, for all cards or per card
+- A drop-in replacement for [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card) and `horizontal-stack-in-card`
 
 ## Installation
 
-Use [HACS](https://hacs.xyz) or follow this [guide](https://github.com/thomasloven/hass-config/wiki/Lovelace-Plugins)
+Requires Home Assistant 2026.4 or newer.
+
+### Marketplace (recommended)
+
+From Home Assistant 2026.11, HACS is built in as the **Marketplace** (Settings → Marketplace). On older versions, use [HACS](https://hacs.xyz/); the steps are the same.
+
+[![Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=I-Simen-I&repository=stack-in-card&category=plugin)
+
+1. Click the button above, or add `https://github.com/I-Simen-I/stack-in-card` as a custom repository of type **Dashboard**. In the Marketplace, adding custom repositories needs a connection to GitHub.
+2. Download **Stack In Card**.
+3. Reload your browser.
+
+### Manual
+
+1. Download `stack-in-card.js` from the [latest release](https://github.com/I-Simen-I/stack-in-card/releases/latest) and copy it to your `config/www` folder. If the folder doesn't exist, create it and restart Home Assistant, which only serves `/local/` from a folder that existed when it started.
+2. Add it as a resource: Settings → Dashboards → ⋮ → Resources → Add resource, with URL `/local/stack-in-card.js` and type **JavaScript module**.
+3. Reload your browser.
+
+### Migrating from the original card
+
+1. Remove the original Stack In Card in the Marketplace (or HACS), or its file and resource if you installed it manually.
+2. Install this card as described above.
+3. Existing card configs keep working. Two things look different, because they were broken in the original card on newer Home Assistant versions:
+   - Borders around the cards in the stack are removed. Keep them with `keep: { border: true }`.
+   - The gap between the cards is removed, unless `keep: { margin: true }` is set.
+
+## Configuration
+
+The card has no visual editor; use the code editor. Add the cards to stack under `cards`, as you would in a vertical stack.
 
 ```yaml
-resources:
-  url: /local/stack-in-card.js
-  type: module
+type: custom:stack-in-card
+title: Living room
+cards:
+  - type: entities
+    entities:
+      - light.ceiling_lights
+  - type: glance
+    entities:
+      - sensor.outside_temperature
+      - sensor.outside_humidity
 ```
 
-[commits-shield]: https://img.shields.io/github/commit-activity/y/custom-cards/stack-in-card.svg?style=for-the-badge
-[commits]: https://github.com/custom-cards/stack-in-card/commits/master
-[devcontainer]: https://code.visualstudio.com/docs/remote/containers
-[discord]: https://discord.gg/5e9yvq
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
-[forum]: https://community.home-assistant.io/t/stack-in-card-drop-in-replacement-for-vertical-stack-in-card/180072
-[license-shield]: https://img.shields.io/github/license/custom-cards/stack-in-card.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/maintenance/yes/2020.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/custom-cards/stack-in-card.svg?style=for-the-badge
-[releases]: https://github.com/custom-cards/stack-in-card/releases
+### Card options
+
+| Name    | Type   | Default    | Description                                            |
+| ------- | ------ | ---------- | ------------------------------------------------------ |
+| `type`  | string | _required_ | `custom:stack-in-card`                                 |
+| `cards` | list   | _required_ | The cards to stack                                     |
+| `mode`  | string | `vertical` | `vertical` or `horizontal`                             |
+| `title` | string |            | Title above the cards                                  |
+| `keep`  | object |            | What to keep of the cards' own look, see [Keep](#keep) |
+
+### Keep
+
+By default the cards in the stack lose their background, border, rounded corners, shadow and the space between them. `keep` brings them back for **all** the cards:
+
+| Name            | Type    | Default          | Description                                         |
+| --------------- | ------- | ---------------- | --------------------------------------------------- |
+| `background`    | boolean | `false`          | Keep the background                                 |
+| `border`        | boolean | `false`          | Keep the border                                     |
+| `border_radius` | boolean | `false`          | Keep the rounded corners                            |
+| `box_shadow`    | boolean | `false`          | Keep the shadow                                     |
+| `margin`        | boolean | `false`          | Keep the space between the cards                    |
+| `outer_padding` | boolean | same as `margin` | Add 8px of space around the cards, inside the stack |
+
+To keep the background or border of **one** card only, set the CSS variable `--keep-background: true` or `--keep-border: true` on that card, with [card-mod](https://github.com/thomasloven/lovelace-card-mod) or the card's own styles (like [button-card](https://github.com/custom-cards/button-card)'s).
+
+## Examples
+
+### Horizontal
+
+```yaml
+type: custom:stack-in-card
+mode: horizontal
+cards:
+  - type: button
+    entity: light.kitchen_lights
+  - type: button
+    entity: light.bed_light
+```
+
+### Nested stacks
+
+Stacks inside the card are merged too:
+
+```yaml
+type: custom:stack-in-card
+title: My Stack In Card
+cards:
+  - type: horizontal-stack
+    cards:
+      - type: button
+        entity: sun.sun
+      - type: button
+        entity: sun.sun
+  - type: entities
+    entities:
+      - sun.sun
+```
+
+### Keep the space between the cards
+
+```yaml
+type: custom:stack-in-card
+keep:
+  margin: true
+  border_radius: true
+cards:
+  - type: button
+    entity: light.kitchen_lights
+  - type: button
+    entity: light.bed_light
+```
+
+### Keep the background of one card
+
+With button-card:
+
+```yaml
+type: custom:stack-in-card
+cards:
+  - type: custom:button-card
+    entity: sun.sun
+    color_type: card
+    styles:
+      card:
+        - --keep-background: "true"
+  - type: entities
+    entities:
+      - sun.sun
+```
+
+## Troubleshooting
+
+- **"Custom element doesn't exist: stack-in-card"**: the card isn't loaded. Check that it's installed in the Marketplace (or HACS), or added as a resource if you installed it manually, then reload your browser.
+- **Changes don't show after an update**: your browser is using a cached copy. Reload without cache (Ctrl+Shift+R or Cmd+Shift+R), or clear the cache in the Home Assistant app.
+- **A card still has a background or border**: the card is styled once it has rendered, and again after half a second. Custom cards that take longer to load can be missed; reload the page. Cards inside a nested `custom:stack-in-card` follow that card's `keep`, not the outer one's.
+
+Still stuck? [Open an issue](https://github.com/I-Simen-I/stack-in-card/issues).
+
+## Development
+
+Requires Node 24 or newer and Yarn 4 via Corepack. Node 25 and newer no longer include Corepack, so install it separately (for example `brew install corepack` or `npm install -g corepack`) and run `corepack enable`.
+
+```bash
+yarn install     # install dependencies
+yarn build       # build dist/stack-in-card.js
+yarn watch       # rebuild on changes
+yarn typecheck   # TypeScript
+yarn lint        # ESLint and Prettier
+yarn test        # smoke tests of the built card
+yarn ha:up       # local Home Assistant with demo data on http://localhost:8124 (needs Docker and a build)
+```
+
+The local test environment and the release process are described in [`dev/README.md`](dev/README.md).
+
+Built with TypeScript, Lit 3 and webpack.
+
+## License
+
+[MIT](LICENSE)

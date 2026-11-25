@@ -1,0 +1,17 @@
+# Own project name; both forks keep their compose file in a folder named dev
+name: stack-in-card
+
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: stack-in-card-ha
+    restart: unless-stopped
+    # 8124, so it can run next to simple-weather-card's test environment
+    ports:
+      - "8124:8123"
+    environment:
+      TZ: Europe/Oslo
+    volumes:
+      - ./config:/config
+      # The built card, loaded through `frontend.extra_module_url`
+      - ../dist:/config/www/stack-in-card:ro

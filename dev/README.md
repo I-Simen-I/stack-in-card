@@ -1,0 +1,61 @@
+# Local test environment
+
+A local Home Assistant in Docker with demo entities and a dashboard covering
+the card's options. The built card in `dist/` is mounted straight in, so
+nothing has to be released to test a change.
+
+## Usage
+
+```bash
+yarn build          # dist/ must exist before the container starts
+yarn ha:up          # start Home Assistant on http://localhost:8124
+yarn watch          # rebuild on every change, then hard refresh the browser
+```
+
+The first time, Home Assistant asks you to create a user (onboarding). After
+that, the login is skipped when opened from localhost.
+
+It runs on port 8124 and in its own Compose project (`stack-in-card`), so it
+can run next to simple-weather-card's test environment on 8123.
+
+Open the **Stack in card** dashboard in the sidebar. Most cards have Home
+Assistant's own stack with the same cards next to them, to compare.
+
+```bash
+yarn ha:logs        # follow the Home Assistant log
+yarn ha:down        # stop the container
+```
+
+## Files
+
+- `config/configuration.yaml`: demo integration, card loaded via
+  `frontend.extra_module_url`, and the dashboard below
+- `config/dashboards/stack.yaml`: test cards (modes, every `keep` option,
+  the CSS flags, nested stacks)
+- `config/www/dev-flag-card.js`: wraps a card and sets CSS variables on it,
+  like card-mod would, to test `--keep-background` and `--keep-border`
+  without installing card-mod
+
+Everything else Home Assistant writes to `config/` is ignored by git. Delete
+it to start over from a fresh install.
+
+## Releasing
+
+1. Go to **Actions → Release → Run workflow** on `master`, pick the version
+   bump and whether it's a beta.
+2. The workflow works out the next version from the tags, checks and builds
+   the card, and creates a **draft** release with generated release notes.
+3. Review the draft, add highlights at the top if you like, and press
+   **Publish**. The tag is created then, and Marketplace (HACS) users get the update.
+
+Betas are tagged `vX.Y.Z-beta-N` and only reach users who enabled beta
+versions in the Marketplace (HACS).
+
+Release notes are grouped by pull request label. Labels are set from the
+branch name: `feat/…` → Features, `fix/…` → Fixes, `chore/…`, `ci/…`,
+`refactor/…` → Maintenance, `docs/…` → Maintenance. Dependabot's pull
+requests go under Dependencies.
+
+The version in `package.json` is a placeholder (`0.0.0-dev`). The card's
+version comes from the tag: the release workflow passes it to the build as
+`CARD_VERSION`, and local builds show `dev`.

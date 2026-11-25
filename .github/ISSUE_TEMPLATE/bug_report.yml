@@ -1,0 +1,62 @@
+name: Bug report
+description: Something doesn't work as expected in the latest release
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please check [Troubleshooting](https://github.com/I-Simen-I/stack-in-card#troubleshooting) first; many problems are a cached old version of the card.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Screenshots help.
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Card configuration
+      description: The card's YAML (open the card editor and choose "Show code editor"), including the cards inside it.
+      render: yaml
+    validations:
+      required: true
+
+  - type: input
+    id: card-version
+    attributes:
+      label: Card version
+      description: Shown in the browser console (Stack In Card vX.Y.Z), or in the Marketplace/HACS.
+      placeholder: v0.3.0
+    validations:
+      required: true
+
+  - type: input
+    id: ha-version
+    attributes:
+      label: Home Assistant version
+      description: Settings → About.
+      placeholder: "2026.11.1"
+    validations:
+      required: true
+
+  - type: input
+    id: other-cards
+    attributes:
+      label: Custom cards inside the stack
+      description: Custom cards in the stack, like button-card or Mushroom, and whether you use card-mod.
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser or app
+      placeholder: Chrome 140, Home Assistant app on iOS
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Browser console errors
+      description: Any errors in the browser console (F12 → Console) when the problem happens.
+      render: text

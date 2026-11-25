@@ -1,0 +1,39 @@
+default_config:
+
+# Demo entities (lights, sensors, switches) to fill the cards in the stacks
+demo:
+
+homeassistant:
+  name: Stack In Card Dev
+  latitude: 59.91
+  longitude: 10.75
+  elevation: 20
+  unit_system: metric
+  time_zone: Europe/Oslo
+  auth_providers:
+    # Skip the login screen when opened locally
+    - type: trusted_networks
+      trusted_networks:
+        - 127.0.0.1
+        - ::1
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+      allow_bypass_login: true
+    - type: homeassistant
+
+frontend:
+  extra_module_url:
+    - /local/dev-loader.js
+    - /local/dev-flag-card.js
+
+lovelace:
+  dashboards:
+    dev-stack:
+      mode: yaml
+      title: Stack in card
+      icon: mdi:card-multiple-outline
+      show_in_sidebar: true
+      filename: dashboards/stack.yaml
+
+logger:
+  default: warning
