@@ -15,6 +15,27 @@ step: copy its setup instead of inventing a new one.
 Personal, machine-specific notes go in `.claude/rules/personal.md` (not
 committed; every file in `.claude/rules/` is loaded automatically).
 
+## Maintainer
+
+Claude is the main maintainer of this code. Simen decides what the card
+should do, tests it in Home Assistant and releases it; the code itself is
+Claude's responsibility. Work like an owner:
+
+- Read the code around a change before writing any. Reuse what's there
+  (`loadCardHelpers` in `src/card-helpers.ts`, the helpers in
+  `test/helpers.mjs`, Home Assistant's own elements and translations)
+  instead of writing a second version. If something almost fits, change it
+  so it fits both uses.
+- Prefer less code: no options, abstractions or fallbacks the card doesn't
+  need. Small functions with names that say what they do; comments for why,
+  not what.
+- Leave the code better than you found it. When a change makes code,
+  options, tests or docs obsolete, remove them in the same change.
+- Keep the code, tests, README, `dev/` and this file in step: a change
+  isn't done until all of them match it.
+- Say so when a request would make the code worse, and suggest a better
+  way, before building it.
+
 ## Layout
 
 - `src/stack-in-card.ts` – the card. `src/editor.ts` – visual editor,
