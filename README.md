@@ -15,7 +15,7 @@ Group several cards into one card on your [Home Assistant](https://www.home-assi
 - **One card from many**: stack any cards vertically or horizontally, and they look like one card
 - **Nested stacks**: horizontal and vertical stacks inside the card are merged too
 - **Visual editor** with Home Assistant's own card tabs
-- **Keep what you want**: background, border, rounded corners, shadow or spacing, for all cards or per card
+- **Nothing to tune**: backgrounds, borders, rounded corners, shadows and gaps of the cards inside are always removed
 - A drop-in replacement for [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card) and `horizontal-stack-in-card`
 
 ## Installation
@@ -42,9 +42,10 @@ From Home Assistant 2026.11, HACS is built in as the **Marketplace** (Settings â
 
 1. Remove the original Stack In Card in the Marketplace (or HACS), or its file and resource if you installed it manually.
 2. Install this card as described above.
-3. Existing card configs keep working. Two things look different, because they were broken in the original card on newer Home Assistant versions:
-   - Borders around the cards in the stack are removed. Keep them with `keep: { border: true }`.
-   - The gap between the cards is removed, unless `keep: { margin: true }` is set.
+3. Existing card configs keep working, but the cards inside always merge into one:
+   - `keep` and the `--keep-background` CSS variable are ignored. Backgrounds, borders, rounded corners, shadows and gaps are always removed. The visual editor removes `keep` from the config.
+   - Borders and the gap between the cards are removed again; they showed in the original card on newer Home Assistant versions.
+   - A nested `custom:stack-in-card` merges into the outer one too.
 
 ## Configuration
 
@@ -52,7 +53,7 @@ Add **Stack In Card** from the card picker; it starts with a weather card above 
 
 ### Visual editor
 
-The editor has the direction (vertical or horizontal), the title and the cards, with the same tabs as Home Assistant's own stacks to add, move, copy and delete cards and edit each one. **Keep the cards' own look** has a switch for each [keep](#keep) option. The editor is in English and Norwegian.
+The editor has the direction (vertical or horizontal), the title and the cards, with the same tabs as Home Assistant's own stacks to add, move, copy and delete cards and edit each one. The editor is in English and Norwegian.
 
 ### YAML
 
@@ -73,28 +74,12 @@ cards:
 
 #### Card options
 
-| Name    | Type   | Default    | Description                                            |
-| ------- | ------ | ---------- | ------------------------------------------------------ |
-| `type`  | string | _required_ | `custom:stack-in-card`                                 |
-| `cards` | list   | _required_ | The cards to stack                                     |
-| `mode`  | string | `vertical` | `vertical` or `horizontal`                             |
-| `title` | string |            | Title above the cards                                  |
-| `keep`  | object |            | What to keep of the cards' own look, see [Keep](#keep) |
-
-#### Keep
-
-By default the cards in the stack lose their background, border, rounded corners, shadow and the space between them. `keep` brings them back for **all** the cards:
-
-| Name            | Type    | Default          | Description                                         |
-| --------------- | ------- | ---------------- | --------------------------------------------------- |
-| `background`    | boolean | `false`          | Keep the background                                 |
-| `border`        | boolean | `false`          | Keep the border                                     |
-| `border_radius` | boolean | `false`          | Keep the rounded corners                            |
-| `box_shadow`    | boolean | `false`          | Keep the shadow                                     |
-| `margin`        | boolean | `false`          | Keep the space between the cards                    |
-| `outer_padding` | boolean | same as `margin` | Add 8px of space around the cards, inside the stack |
-
-To keep the background or border of **one** card only, set the CSS variable `--keep-background: true` or `--keep-border: true` on that card, with [card-mod](https://github.com/thomasloven/lovelace-card-mod) or the card's own styles (like [button-card](https://github.com/custom-cards/button-card)'s).
+| Name    | Type   | Default    | Description                |
+| ------- | ------ | ---------- | -------------------------- |
+| `type`  | string | _required_ | `custom:stack-in-card`     |
+| `cards` | list   | _required_ | The cards to stack         |
+| `mode`  | string | `vertical` | `vertical` or `horizontal` |
+| `title` | string |            | Title above the cards      |
 
 ## Examples
 
@@ -129,43 +114,11 @@ cards:
       - sun.sun
 ```
 
-### Keep the space between the cards
-
-```yaml
-type: custom:stack-in-card
-keep:
-  margin: true
-  border_radius: true
-cards:
-  - type: button
-    entity: light.kitchen_lights
-  - type: button
-    entity: light.bed_light
-```
-
-### Keep the background of one card
-
-With button-card:
-
-```yaml
-type: custom:stack-in-card
-cards:
-  - type: custom:button-card
-    entity: sun.sun
-    color_type: card
-    styles:
-      card:
-        - --keep-background: "true"
-  - type: entities
-    entities:
-      - sun.sun
-```
-
 ## Troubleshooting
 
 - **"Custom element doesn't exist: stack-in-card"**: the card isn't loaded. Check that it's installed in the Marketplace (or HACS), or added as a resource if you installed it manually, then reload your browser.
 - **Changes don't show after an update**: your browser is using a cached copy. Reload without cache (Ctrl+Shift+R or Cmd+Shift+R), or clear the cache in the Home Assistant app.
-- **A card still has a background or border**: the card is styled once it has rendered, and again after half a second. Custom cards that take longer to load can be missed; reload the page. Cards inside a nested `custom:stack-in-card` follow that card's `keep`, not the outer one's.
+- **A card still has a background or border**: the card is styled once it has rendered, and again after half a second. Custom cards that take longer to load can be missed; reload the page.
 
 Still stuck? [Open an issue](https://github.com/I-Simen-I/stack-in-card/issues).
 

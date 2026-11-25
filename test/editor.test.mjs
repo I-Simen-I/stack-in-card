@@ -23,11 +23,10 @@ test("edits the cards with Home Assistant's stack editor", async () => {
   const { editor } = await createEditor({
     title: "Living room",
     mode: "horizontal",
-    keep: { margin: true },
   });
   const stackEditor = stackEditorOf(editor);
   assert.ok(stackEditor, "the stack editor is not shown");
-  // Without mode and keep, which it would reject
+  // Without the mode, which it would reject
   assert.deepEqual(stackEditor.config, {
     type: "horizontal-stack",
     title: "Living room",
@@ -38,7 +37,7 @@ test("edits the cards with Home Assistant's stack editor", async () => {
   editor.remove();
 });
 
-test("keeps mode and keep when the cards or title change", async () => {
+test("keeps the mode when the cards or title change, and drops keep", async () => {
   const { editor, configs } = await createEditor({
     title: "Living room",
     mode: "horizontal",
@@ -55,11 +54,11 @@ test("keeps mode and keep when the cards or title change", async () => {
       composed: true,
     }),
   );
+  // `keep` from the original card does nothing, so it's removed
   assert.deepEqual(configs.at(-1), {
     type: "custom:stack-in-card",
     title: "Living room",
     mode: "horizontal",
-    keep: { border: true },
     cards,
   });
   assert.equal(configs.length, 1, "the stack editor's event got through");
@@ -89,45 +88,11 @@ test("only stores the mode when it's horizontal", async () => {
   editor.remove();
 });
 
-test("only stores keep switches that differ from the default", async () => {
-  const { editor, configs } = await createEditor({});
-  const form = formWith(editor, "margin");
-  assert.deepEqual(form.data, {
-    background: false,
-    border: false,
-    border_radius: false,
-    box_shadow: false,
-    margin: false,
-    outer_padding: false,
-  });
-
-  const defaults = form.data;
-  change(form, { ...defaults, border: true });
-  assert.deepEqual(configs.at(-1).keep, { border: true });
-  await editor.updateComplete;
-  assert.equal(form.data.border, true, "the switch doesn't follow the config");
-
-  // outer_padding follows margin, so it isn't stored with it
-  change(form, { ...defaults, margin: true, outer_padding: false });
-  assert.deepEqual(configs.at(-1).keep, { margin: true, outer_padding: false });
-  change(form, { ...defaults, margin: true, outer_padding: true });
-  assert.deepEqual(configs.at(-1).keep, { margin: true });
-  await editor.updateComplete;
-  assert.equal(form.data.outer_padding, true);
-
-  // Back to the defaults removes keep
-  change(form, defaults);
-  assert.equal("keep" in configs.at(-1), false);
-  editor.remove();
-});
-
 test("translates the editor", async () => {
   const { editor } = await createEditor(
     {},
     { ...HASS, locale: { language: "nb" } },
   );
-  const header = editor.shadowRoot.querySelector('[slot="header"]');
-  assert.equal(header.textContent.trim(), "Behold kortenes eget utseende");
   const mode = formWith(editor, "mode");
   assert.equal(mode.computeLabel({ name: "mode" }), "Retning");
   assert.deepEqual(

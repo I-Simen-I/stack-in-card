@@ -22,24 +22,9 @@ export interface CardHelpers {
   createCardElement(config: LovelaceCardConfig): LovelaceCard;
 }
 
-export interface KeepConfig {
-  background?: boolean;
-  border?: boolean;
-  border_radius?: boolean;
-  box_shadow?: boolean;
-  margin?: boolean;
-  outer_padding?: boolean;
-}
-
 export interface StackInCardConfig {
   type: string;
   title?: string;
   mode?: "vertical" | "horizontal";
   cards: LovelaceCardConfig[];
-  keep?: KeepConfig;
-}
-
-export interface NormalizedConfig extends StackInCardConfig {
-  mode: "vertical" | "horizontal";
-  keep: Required<KeepConfig>;
 }

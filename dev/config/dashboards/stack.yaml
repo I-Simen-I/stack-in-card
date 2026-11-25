@@ -40,77 +40,6 @@ views:
       - type: custom:stack-in-card
         cards: *buttons
 
-  - title: Keep
-    path: keep
-    cards:
-      - type: custom:stack-in-card
-        title: "keep: margin"
-        keep:
-          margin: true
-        cards: *buttons
-      - type: custom:stack-in-card
-        title: "keep: margin, no outer_padding"
-        keep:
-          margin: true
-          outer_padding: false
-        cards: *buttons
-      - type: custom:stack-in-card
-        title: "keep: background"
-        keep:
-          background: true
-        cards: *buttons
-      - type: custom:stack-in-card
-        title: "keep: border"
-        keep:
-          border: true
-        cards: *buttons
-      - type: custom:stack-in-card
-        title: "keep: border_radius, border"
-        keep:
-          border: true
-          border_radius: true
-          margin: true
-        cards: *buttons
-      - type: custom:stack-in-card
-        title: "keep: box_shadow, margin"
-        keep:
-          box_shadow: true
-          margin: true
-        cards: *buttons
-
-  - title: Flags
-    path: flags
-    cards:
-      - type: custom:stack-in-card
-        title: --keep-background on the middle card
-        mode: horizontal
-        cards:
-          - type: button
-            entity: light.bed_light
-          - type: custom:dev-flag-card
-            style:
-              --keep-background: "true"
-              --ha-card-background: var(--primary-color)
-            card:
-              type: button
-              entity: light.ceiling_lights
-          - type: button
-            entity: light.kitchen_lights
-      - type: custom:stack-in-card
-        title: --keep-border on the middle card
-        mode: horizontal
-        cards:
-          - type: button
-            entity: light.bed_light
-          - type: custom:dev-flag-card
-            style:
-              --keep-border: "true"
-            card:
-              type: button
-              entity: light.ceiling_lights
-          - type: button
-            entity: light.kitchen_lights
-
   - title: Nested
     path: nested
     cards:
@@ -128,15 +57,13 @@ views:
                 entities:
                   - light.ceiling_lights
       - type: custom:stack-in-card
-        title: Nested stack-in-card keeping its margin
+        title: Nested stack-in-card
         cards:
           - type: entities
             entities:
               - light.bed_light
           - type: custom:stack-in-card
             mode: horizontal
-            keep:
-              margin: true
             cards: *buttons
       - type: custom:stack-in-card
         title: Empty (shows nothing outside the editor)

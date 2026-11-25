@@ -1,14 +1,9 @@
-import { LitElement, PropertyValues, css, html, nothing } from "lit";
+import { LitElement, PropertyValues, html, nothing } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 
 import { loadCardHelpers } from "./card-helpers";
 import { localize } from "./localize";
-import {
-  HomeAssistant,
-  KeepConfig,
-  LovelaceCardConfig,
-  StackInCardConfig,
-} from "./types";
+import { HomeAssistant, LovelaceCardConfig, StackInCardConfig } from "./types";
 
 const fireEvent = (node: EventTarget, type: string, detail?: unknown): void => {
   node.dispatchEvent(
@@ -17,15 +12,6 @@ const fireEvent = (node: EventTarget, type: string, detail?: unknown): void => {
 };
 
 type Translate = (key: string) => string;
-
-const KEEP_KEYS = [
-  "background",
-  "border",
-  "border_radius",
-  "box_shadow",
-  "margin",
-  "outer_padding",
-] as const;
 
 // Home Assistant's editor for its stacks: tabs per card, add, move, copy,
 // cut and delete, and the visual editor of each card
@@ -61,23 +47,9 @@ const buildSchemas = (t: Translate) => ({
       },
     },
   ],
-  keep: KEEP_KEYS.map((name) => ({ name, selector: { boolean: {} } })),
 });
 
 type Schemas = ReturnType<typeof buildSchemas>;
-
-// What the keep switches show: the config, or the defaults
-const keepData = (keep: KeepConfig = {}): Required<KeepConfig> => {
-  const margin = keep.margin ?? false;
-  return {
-    background: keep.background ?? false,
-    border: keep.border ?? false,
-    border_radius: keep.border_radius ?? false,
-    box_shadow: keep.box_shadow ?? false,
-    margin,
-    outer_padding: keep.outer_padding ?? margin,
-  };
-};
 
 @customElement("stack-in-card-editor")
 export class StackInCardEditor extends LitElement {
@@ -90,20 +62,6 @@ export class StackInCardEditor extends LitElement {
   // Built once per language. New schema objects on every render would make
   // ha-form rebuild its fields.
   private _schemaCache?: { language: string; schemas: Schemas };
-
-  static styles = css`
-    ha-expansion-panel {
-      margin-top: 16px;
-    }
-    .section-content {
-      padding: 8px 16px 16px;
-    }
-    .help {
-      color: var(--secondary-text-color);
-      font-size: 0.875em;
-      margin: 8px 0 0;
-    }
-  `;
 
   setConfig(config: StackInCardConfig): void {
     this._config = config;
@@ -162,23 +120,9 @@ export class StackInCardEditor extends LitElement {
     this._fire(config);
   }
 
-  // ha-form sends every switch, so only store the ones that differ from
-  // the default. Otherwise defaults end up in the user's config.
-  private _keepChanged(ev: CustomEvent): void {
-    ev.stopPropagation();
-    if (!this._config) return;
-    const value = ev.detail.value as Required<KeepConfig>;
-    const defaults = { ...keepData(), outer_padding: value.margin };
-    const keep: KeepConfig = {};
-    for (const key of KEEP_KEYS) {
-      if (value[key] !== defaults[key]) keep[key] = value[key];
-    }
-    const config: StackInCardConfig = { ...this._config, keep };
-    if (Object.keys(keep).length === 0) delete config.keep;
-    this._fire(config);
-  }
-
   private _fire(config: StackInCardConfig): void {
+    // `keep` from the original card does nothing here, so it's removed
+    delete (config as { keep?: unknown }).keep;
     this._config = config;
     fireEvent(this, "config-changed", { config });
   }
@@ -208,22 +152,6 @@ export class StackInCardEditor extends LitElement {
         @value-changed=${this._modeChanged}
       ></ha-form>
       ${this._stackEditor ?? nothing}
-      <ha-expansion-panel outlined>
-        <span slot="header"
-          ><ha-icon icon="mdi:palette-outline"></ha-icon>
-          ${this._t("sections.keep")}</span
-        >
-        <div class="section-content">
-          <ha-form
-            .hass=${this.hass}
-            .data=${keepData(this._config.keep)}
-            .schema=${this._schemas.keep}
-            .computeLabel=${this._computeLabel}
-            @value-changed=${this._keepChanged}
-          ></ha-form>
-          <p class="help">${this._t("keep_help")}</p>
-        </div>
-      </ha-expansion-panel>
     `;
   }
 }

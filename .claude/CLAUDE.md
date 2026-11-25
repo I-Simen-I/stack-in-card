@@ -74,37 +74,41 @@ Use these instead of doing the steps by hand; they hold the details.
 
 ## How the card works
 
-- `setConfig` requires a `cards` list and a `vertical`/`horizontal` `mode`,
-  and fills in every `keep` flag (`false`; `outer_padding` follows `margin`).
+- `setConfig` requires a `cards` list and a `vertical`/`horizontal` `mode`.
   It creates a `${mode}-stack` with `window.loadCardHelpers()`
   (`createCardElement`). `hass` and `preview` are passed to the stack when it
   is ready and on every change after that.
-- Styling walks the DOM after each render (`_styleTree`): in a shadow root it
-  styles the `ha-card`, or, in stacks, the `#root` (or `#card`) container and
-  its children; in the light DOM (`hui-card`) it goes through the children.
-  It sets inline styles: `box-shadow`, `border-radius`, `border`, `margin` on
-  the children, `gap` on stack roots, `padding` for `outer_padding`. The
-  background is removed in a second pass after 500 ms, as in the original
-  card, so late flags and late cards are caught.
-- `--keep-background: true` / `--keep-border: true` on a child card (via
-  card-mod or button-card) keep its background or border.
-- Nested `stack-in-card` elements are skipped; they style themselves.
+- Styling walks the DOM after each render (`_styleTree`) and again after
+  500 ms for cards that render late: in a shadow root it merges the
+  `ha-card`, or, in stacks, goes through the `#root` (or `#card`) container
+  and its children; in the light DOM (`hui-card`) it goes through the
+  children. Inline styles: `background`, `border`, `border-radius`,
+  `box-shadow` on every `ha-card`, `margin` on the children, `gap` on stack
+  roots.
+- A nested `stack-in-card` gets its `ha-card` merged like any card, and
+  merges its own cards.
 - `ll-rebuild` from the stack recreates it.
 - Visual editor: a `mode` form on top, then Home Assistant's own stack
   editor (`hui-stack-card-editor`, from
   `customElements.get("hui-vertical-stack-card").getConfigElement()`) for
-  the title and the cards, then an expansion panel with the `keep`
-  switches. The stack editor validates with superstruct and rejects
-  unknown options, so it only gets `{ type: "<mode>-stack", title, cards }`;
-  its `config-changed` is stopped and merged into the full config. `mode`
-  is only stored when horizontal, `keep` switches only when they differ
-  from the default (`outer_padding` follows `margin`).
+  the title and the cards. The stack editor validates with superstruct and
+  rejects unknown options, so it only gets
+  `{ type: "<mode>-stack", title, cards }`; its `config-changed` is stopped
+  and merged into the full config. `mode` is only stored when horizontal;
+  `keep` from the original card is removed on any change.
 - Card picker: `preview: true` in `window.customCards`, and
   `getStubConfig(hass, entities, entitiesFallback)` returns a
   `weather-forecast` card above a `horizontal-stack` of three buttons, with
   the entities the picker suggests first (like HA's own cards). No weather
   entity: no weather card. Too few lights/switches: icon-only buttons. It's
   also the config a new card starts with.
+
+## Decisions
+
+- Everything always merges: no options to keep the background, border,
+  rounded corners, shadow or spacing of the cards inside (the original
+  card's `keep` and `--keep-background`/`--keep-border` were removed on
+  purpose, 2026-11-25). `keep` in old configs is ignored, not an error.
 
 ## Home Assistant specifics
 
@@ -135,10 +139,8 @@ frontend repo (`home-assistant/frontend`), especially
   without the `name:` the projects clash and one replaces the other's
   container.
 - Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): views for
-  the basics, every `keep` option, the CSS flags and nested stacks, mostly
-  next to HA's own stack with the same cards.
-- `dev-flag-card` wraps a card and sets CSS variables on it, to test
-  `--keep-background` and `--keep-border` without card-mod.
+  the basics (next to HA's own stacks with the same cards) and nested
+  stacks.
 - `dev-loader.js` imports the card with `?t=<now>`, because HA serves
   `/local/` with a 31 day cache. Other files in `www/` need a hard refresh.
 - Changes to `configuration.yaml` need `docker restart stack-in-card-ha`.

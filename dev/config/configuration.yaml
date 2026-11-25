@@ -24,7 +24,6 @@ homeassistant:
 frontend:
   extra_module_url:
     - /local/dev-loader.js
-    - /local/dev-flag-card.js
 
 lovelace:
   dashboards:

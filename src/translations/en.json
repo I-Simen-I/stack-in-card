@@ -1,19 +1,9 @@
 {
   "fields": {
-    "mode": "Direction",
-    "background": "Background",
-    "border": "Border",
-    "border_radius": "Rounded corners",
-    "box_shadow": "Shadow",
-    "margin": "Space between the cards",
-    "outer_padding": "Space around the cards"
+    "mode": "Direction"
   },
   "modes": {
     "vertical": "Vertical",
     "horizontal": "Horizontal"
-  },
-  "sections": {
-    "keep": "Keep the cards' own look"
-  },
-  "keep_help": "Applies to all the cards. To keep the background or border of one card, set --keep-background or --keep-border to true on it with card-mod."
+  }
 }

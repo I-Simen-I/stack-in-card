@@ -18,11 +18,11 @@ import {
 
 setupDom();
 
-const assertStripped = (haCard, { background = true } = {}) => {
-  assert.equal(haCard.style.boxShadow, "none");
-  assert.equal(haCard.style.borderRadius, "0px");
+const assertMerged = (haCard) => {
+  assert.equal(haCard.style.background, "transparent");
   assert.equal(haCard.style.borderStyle, "none", "border");
-  if (background) assert.equal(haCard.style.background, "transparent");
+  assert.equal(haCard.style.borderRadius, "0px");
+  assert.equal(haCard.style.boxShadow, "none");
 };
 
 test("registers the card and logs its version", () => {
@@ -154,26 +154,31 @@ test("passes preview to the stack", async () => {
   card.remove();
 });
 
-test("removes shadow, border, radius and spacing right away, background later", async () => {
+test("merges the cards: no background, border, corners, shadow or spacing", async () => {
   const card = await createCard();
   const stack = stackOf(card);
-  const haCards = haCardsOf(stack);
-
-  for (const haCard of haCards) assertStripped(haCard, { background: false });
-  assert.equal(haCards[0].style.background, "white");
+  for (const haCard of haCardsOf(stack)) assertMerged(haCard);
   assert.equal(rootOf(stack).style.gap, "0");
   assert.equal(rootOf(stack).style.padding, "");
   for (const huiCard of stack.cards) {
     assert.equal(huiCard.style.margin, "0px");
     assert.equal(huiCard.firstElementChild.style.margin, "0px");
   }
-
-  await restyled();
-  for (const haCard of haCards) assertStripped(haCard);
   card.remove();
 });
 
-test("keeps what `keep` asks for", async () => {
+test("merges cards that render late", async () => {
+  const card = await createCard();
+  const late = document.createElement("hui-card");
+  late.config = { type: "test" };
+  rootOf(stackOf(card)).appendChild(late);
+  await restyled();
+  assertMerged(late.firstElementChild.shadowRoot.querySelector("ha-card"));
+  card.remove();
+});
+
+test("can't be told to keep anything", async () => {
+  // `keep` from the original card, and the CSS flags it read
   const card = await createCard({
     keep: {
       background: true,
@@ -181,52 +186,23 @@ test("keeps what `keep` asks for", async () => {
       border_radius: true,
       box_shadow: true,
       margin: true,
+      outer_padding: true,
     },
+    cards: [{ type: "test", keep: { background: true, border: true } }],
   });
+  await restyled();
   const stack = stackOf(card);
-  await restyled();
-  for (const haCard of haCardsOf(stack)) {
-    assert.equal(haCard.style.boxShadow, "0 2px 2px black");
-    assert.equal(haCard.style.borderRadius, "12px");
-    assert.equal(haCard.style.borderStyle, "solid");
-    assert.equal(haCard.style.background, "white");
-  }
-  assert.equal(rootOf(stack).style.gap, "8px");
-  assert.equal(stack.cards[0].style.margin, "");
-  // outer_padding follows margin
-  assert.equal(rootOf(stack).style.padding, "8px");
+  for (const haCard of haCardsOf(stack)) assertMerged(haCard);
+  assert.equal(rootOf(stack).style.gap, "0");
+  assert.equal(rootOf(stack).style.padding, "");
   card.remove();
 });
 
-test("outer_padding can be turned off when margin is kept", async () => {
-  const card = await createCard({
-    keep: { margin: true, outer_padding: false },
-  });
-  assert.equal(rootOf(stackOf(card)).style.padding, "");
-  card.remove();
-});
-
-test("keeps the background and border of cards that set the CSS flags", async () => {
-  const card = await createCard({
-    cards: [
-      { type: "test", keep: { background: true, border: true } },
-      CARDS[1],
-    ],
-  });
-  await restyled();
-  const [flagged, plain] = haCardsOf(stackOf(card));
-  assert.equal(flagged.style.background, "white");
-  assert.equal(flagged.style.borderStyle, "solid");
-  assert.equal(flagged.style.boxShadow, "none");
-  assertStripped(plain);
-  card.remove();
-});
-
-test("styles cards in nested stacks, but not in a nested stack-in-card", async () => {
+test("merges nested stacks and nested stack-in-cards", async () => {
   const card = await createCard({
     cards: [
       { type: "horizontal-stack", cards: CARDS },
-      { type: "custom:stack-in-card", cards: CARDS, keep: { margin: true } },
+      { type: "custom:stack-in-card", cards: CARDS },
     ],
   });
   await restyled();
@@ -235,11 +211,14 @@ test("styles cards in nested stacks, but not in a nested stack-in-card", async (
   );
 
   assert.equal(rootOf(nestedStack).style.gap, "0");
-  for (const haCard of haCardsOf(nestedStack)) assertStripped(haCard);
+  for (const haCard of haCardsOf(nestedStack)) assertMerged(haCard);
 
-  // Styled by its own config, which keeps the margin
-  assert.equal(nestedStackInCard.style.margin, "");
-  assert.equal(rootOf(stackOf(nestedStackInCard)).style.gap, "8px");
+  // Its own ha-card merges into this one, and it merges its own cards
+  assert.equal(nestedStackInCard.style.margin, "0px");
+  assertMerged(nestedStackInCard.shadowRoot.querySelector("ha-card"));
+  for (const haCard of haCardsOf(stackOf(nestedStackInCard))) {
+    assertMerged(haCard);
+  }
   card.remove();
 });
 

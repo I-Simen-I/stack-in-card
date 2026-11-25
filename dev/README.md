@@ -30,11 +30,8 @@ yarn ha:down        # stop the container
 
 - `config/configuration.yaml`: demo integration, card loaded via
   `frontend.extra_module_url`, and the dashboard below
-- `config/dashboards/stack.yaml`: test cards (modes, every `keep` option,
-  the CSS flags, nested stacks)
-- `config/www/dev-flag-card.js`: wraps a card and sets CSS variables on it,
-  like card-mod would, to test `--keep-background` and `--keep-border`
-  without installing card-mod
+- `config/dashboards/stack.yaml`: test cards (both modes, nested stacks,
+  a nested stack-in-card)
 
 Everything else Home Assistant writes to `config/` is ignored by git. Delete
 it to start over from a fresh install.
