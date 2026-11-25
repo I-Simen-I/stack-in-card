@@ -114,6 +114,9 @@ Use these instead of doing the steps by hand; they hold the details.
   rounded corners, shadow or spacing of the cards inside (the original
   card's `keep` and `--keep-background`/`--keep-border` were removed on
   purpose, 2026-11-25). `keep` in old configs is ignored, not an error.
+  The merge styles are set inline without `!important` on purpose, so
+  card-mod with `!important` on a card inside can still override them;
+  that's an accepted escape hatch.
 - No translation files of our own: the editor uses Home Assistant's
   translations, which cover every language. Add own translations only if
   the editor gets text HA has no string for.
