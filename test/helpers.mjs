@@ -92,8 +92,13 @@ const defineFakeCards = () => {
     "hui-card",
     class extends HTMLElement {
       set config(config) {
+        this._config = config;
         this._element = createCardElement(config);
         this.appendChild(this._element);
+      }
+
+      get config() {
+        return this._config;
       }
 
       set hass(hass) {

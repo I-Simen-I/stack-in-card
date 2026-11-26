@@ -200,6 +200,9 @@ test("doesn't clip the cards inside, so their menus can reach outside", async ()
   card.remove();
 });
 
+// happy-dom may write a flex basis of 0 as 0px or 0%
+const normalizeFlex = (flex) => flex.replace(/ 0(px|%)$/, " 0");
+
 // The corners each card in a stack gets
 const radiusOf = (element) =>
   element.style.getPropertyValue("--ha-card-border-radius");
@@ -283,6 +286,80 @@ test("rounds the corners of a horizontal stack, and not under a title", async ()
     "0px 0px 0px 0px",
   ]);
   grid.remove();
+});
+
+test("fills the height a sections dashboard gives it", async () => {
+  const card = await createCard();
+  const css = card.shadowRoot.querySelector("style").textContent;
+  for (const selector of [":host", "ha-card"]) {
+    const rule = new RegExp(
+      `${selector.replace(":", "\\:")}\\s*{([^}]*)}`,
+    ).exec(css)?.[1];
+    assert.match(rule ?? "", /height:\s*100%/, selector);
+  }
+  card.remove();
+});
+
+// The flex of each card in a stack: the card in a horizontal stack, its
+// hui-card in a vertical one
+const flexOf = (element) => element.style.getPropertyValue("flex");
+
+test("gives cards in a horizontal stack the width of their columns", async () => {
+  const card = await createCard({
+    mode: "horizontal",
+    cards: [
+      { type: "test", grid_options: { columns: 2 } },
+      { type: "test" },
+      { type: "test", grid_options: { columns: "full" } },
+    ],
+  });
+  const cards = stackOf(card).cards.map((huiCard) => huiCard.firstElementChild);
+  assert.deepEqual(cards.map(flexOf).map(normalizeFlex), [
+    "2 2 0",
+    "1 1 0",
+    "1 1 0",
+  ]);
+  card.remove();
+});
+
+test("gives cards in a vertical stack the height of their rows", async () => {
+  const card = await createCard({
+    cards: [
+      { type: "test", grid_options: { rows: 2 } },
+      { type: "test" },
+      { type: "test", grid_options: { rows: 1 } },
+    ],
+  });
+  const huiCards = stackOf(card).cards;
+  assert.deepEqual(huiCards.map(flexOf).map(normalizeFlex), [
+    "2 2 0",
+    "0 0 auto",
+    "1 1 0",
+  ]);
+  assert.deepEqual(
+    huiCards.map((huiCard) => huiCard.firstElementChild.style.height),
+    ["100%", "", "100%"],
+  );
+  card.remove();
+});
+
+test("sizes cards in nested stacks, and leaves stacks without sizes alone", async () => {
+  const card = await createCard({
+    cards: [
+      CARDS[0],
+      {
+        type: "horizontal-stack",
+        cards: [{ type: "test", grid_options: { columns: 3 } }, CARDS[0]],
+      },
+    ],
+  });
+  const [plain, row] = stackOf(card).cards;
+  assert.equal(flexOf(plain), "", "the outer stack sets no sizes");
+  const rowCards = row.firstElementChild.cards.map(
+    (huiCard) => huiCard.firstElementChild,
+  );
+  assert.deepEqual(rowCards.map(flexOf).map(normalizeFlex), ["3 3 0", "1 1 0"]);
+  card.remove();
 });
 
 test("merges cards that render late", async () => {

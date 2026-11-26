@@ -166,3 +166,62 @@ views:
               - light.bed_light
           - type: picture
             image: /local/dev-picture.svg
+
+  # Sections dashboard: the card fills the rows it gets, and cards inside
+  # get their width (columns) and height (rows) from their grid_options
+  - title: Sections
+    path: sections
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Widths from columns (2 and 1)
+          - type: custom:stack-in-card
+            mode: horizontal
+            grid_options:
+              columns: 12
+              rows: 3
+            cards:
+              - type: weather-forecast
+                entity: weather.demo_weather_south
+                grid_options:
+                  columns: 2
+              - type: sensor
+                entity: sensor.indoor_temperature
+                graph: line
+                grid_options:
+                  columns: 1
+          - type: heading
+            heading: Fills 4 rows, no sizes inside
+          - type: custom:stack-in-card
+            grid_options:
+              columns: 12
+              rows: 4
+            cards:
+              - type: tile
+                entity: light.bed_light
+              - type: tile
+                entity: light.ceiling_lights
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heights from rows (none, 2 and 1)
+          - type: custom:stack-in-card
+            grid_options:
+              columns: 12
+              rows: 6
+            cards:
+              - type: tile
+                entity: climate.ecobee
+              - type: entities
+                entities:
+                  - sensor.indoor_temperature
+                  - sensor.indoor_humidity
+                grid_options:
+                  rows: 2
+              - type: gauge
+                entity: sensor.indoor_humidity
+                grid_options:
+                  rows: 1

@@ -5,6 +5,7 @@ import {
   LovelaceCard,
   LovelaceCardConfig,
   MODES,
+  Mode,
   StackInCardConfig,
 } from "./types";
 
@@ -41,7 +42,21 @@ const afterUpdate = async (element: Element): Promise<void> => {
 // transition. The variables only reach the cards inside, not this card's
 // own ha-card.
 const STYLES = `
+  /* Fill the height a sections dashboard gives the card (its rows) */
+  :host {
+    display: block;
+    height: 100%;
+  }
+  ha-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
   .stack {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
     --ha-card-background: transparent;
     --ha-card-border-width: 0px;
     --ha-card-border-radius: 0px;
@@ -50,6 +65,10 @@ const STYLES = `
     --vertical-stack-card-gap: 0px;
     --horizontal-stack-card-gap: 0px;
     --grid-card-gap: 0px;
+  }
+  .stack > * {
+    flex: 1;
+    min-height: 0;
   }
 `;
 
@@ -70,7 +89,7 @@ const NO_CORNERS: Corners = ["0px", "0px", "0px", "0px"];
 // The corners of a stack that the card at `index` touches
 const childCorners = (
   corners: Corners,
-  layout: "vertical" | "horizontal" | undefined,
+  layout: Mode | undefined,
   index: number,
   count: number,
 ): Corners => {
@@ -88,9 +107,45 @@ const childCorners = (
   return count === 1 ? corners : NO_CORNERS;
 };
 
-const STACK_LAYOUTS: Record<string, "vertical" | "horizontal"> = {
+const STACK_LAYOUTS: Record<string, Mode> = {
   "hui-vertical-stack-card": "vertical",
   "hui-horizontal-stack-card": "horizontal",
+};
+
+// How much of a stack a card inside takes, from its own grid_options:
+// `columns` in a horizontal stack, `rows` in a vertical one, as relative
+// weights, like nested-lovelace-card. Anything but a positive number
+// ("full", "auto") counts as not set.
+const GRID_SIZE: Record<Mode, "columns" | "rows"> = {
+  horizontal: "columns",
+  vertical: "rows",
+};
+
+const sizeOf = (huiCard: Element, layout: Mode): number | undefined => {
+  const { config } = huiCard as { config?: LovelaceCardConfig };
+  const options = config?.grid_options as Record<string, unknown> | undefined;
+  const size = Number(options?.[GRID_SIZE[layout]]);
+  return size > 0 ? size : undefined;
+};
+
+// Gives a card in a stack its share. Horizontal: cards without `columns`
+// get 1, so they keep equal widths. Vertical: cards without `rows` keep
+// their own height, and the cards with `rows` share the rest and fill it.
+const setSize = (
+  huiCard: HTMLElement,
+  layout: Mode,
+  size: number | undefined,
+): void => {
+  const card = huiCard.firstElementChild as HTMLElement | null;
+  if (layout === "horizontal") {
+    // hui-card is display: contents here, so the card is the flex item
+    const weight = size ?? 1;
+    card?.style.setProperty("flex", `${weight} ${weight} 0`);
+    return;
+  }
+  huiCard.style.flex = size ? `${size} ${size} 0` : "0 0 auto";
+  huiCard.style.minHeight = "0";
+  if (size) card?.style.setProperty("height", "100%");
 };
 
 const computeCardSize = (card: LovelaceCard): number | Promise<number> => {
@@ -289,13 +344,18 @@ export class StackInCard extends HTMLElement {
   private _styleChildren(
     parent: Element,
     corners: Corners,
-    layout?: "vertical" | "horizontal",
+    layout?: Mode,
     wrapper = false,
   ): void {
     const children = Array.from(parent.children).filter(
       (child): child is HTMLElement => child instanceof HTMLElement,
     );
+    // Only when a card inside sets its size, so stacks without stay as
+    // Home Assistant lays them out
+    const sizes = layout ? children.map((child) => sizeOf(child, layout)) : [];
+    const sized = sizes.some((size) => size !== undefined);
     children.forEach((child, index) => {
+      if (layout && sized) setSize(child, layout, sizes[index]);
       const own = wrapper
         ? corners
         : childCorners(corners, layout, index, children.length);

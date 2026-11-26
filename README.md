@@ -16,9 +16,10 @@ Group several cards into one card on your [Home Assistant](https://www.home-assi
 - **Nested stacks**: horizontal and vertical stacks inside the card, and other stack-in-cards, are merged too
 - **No flicker**: Home Assistant's cards are merged before they're shown, so their borders never flash on page load
 - **Nothing to tune**: backgrounds, borders, rounded corners, shadows and gaps of the cards inside are always removed
+- **Sizes for the cards inside**: give a card more width or height with its own `grid_options`, and the card fills the rows it gets in a sections dashboard
 - **Nothing cut off**: menus of the cards inside can reach outside the card, and pictures in its corners follow its rounded corners
 - **Visual editor** with Home Assistant's own card tabs, in your Home Assistant language
-- **Small**: about 7 KB, without dependencies
+- **Small**: about 8 KB, without dependencies
 - A drop-in replacement for [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card) and `horizontal-stack-in-card`
 
 ## Installation
@@ -87,6 +88,33 @@ The cards inside always lose their background, border, rounded corners, shadow a
 card_mod:
   style: |
     ha-card { background: var(--primary-color) !important; }
+```
+
+#### Size of the cards inside
+
+Since v1.1.0, a card inside can take more or less room with its own `grid_options`, the same keys Home Assistant uses in sections dashboards:
+
+| Stack        | Key       | Effect                                                                                                                              |
+| ------------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `horizontal` | `columns` | Relative width. Cards without `columns` count as 1, so `columns: 2` next to a card without makes it twice as wide.                  |
+| `vertical`   | `rows`    | Relative height. Cards without `rows` keep their own height; the cards with `rows` share the rest. Needs a fixed height, see below. |
+
+The values are weights relative to the other cards in the stack, not Home Assistant's 12 columns, the same as in [nested-lovelace-card](https://github.com/Liquidmasl/nested-lovelace-card). Without `grid_options` on the cards inside, nothing changes. Heights only change when the card itself has a fixed height, from `rows` in a sections dashboard. The visual editor doesn't show `grid_options` for the cards inside, so set them in the code editor.
+
+```yaml
+type: custom:stack-in-card
+mode: horizontal
+grid_options:
+  columns: 12
+  rows: 3
+cards:
+  - type: weather-forecast
+    entity: weather.home
+    grid_options:
+      columns: 2
+  - type: sensor
+    entity: sensor.outdoor_temperature
+    graph: line
 ```
 
 ## Examples

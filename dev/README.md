@@ -32,7 +32,7 @@ yarn ha:down        # stop the container
   `frontend.extra_module_url`, and the dashboard below
 - `config/dashboards/stack.yaml`: test cards (the README images, both
   modes next to Home Assistant's own stacks, nested stacks, content
-  reaching outside the card)
+  reaching outside the card, sizes in a sections dashboard)
 - `config/www/dev-popup-card.js`: a card with an always open menu, drawn
   like custom cards draw theirs, for the Overflow view
 - `config/www/dev-picture.svg`: a colorful picture for the Overflow view,
