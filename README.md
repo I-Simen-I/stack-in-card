@@ -255,8 +255,6 @@ Built with TypeScript and webpack, without runtime dependencies.
 
 ## More cards
 
-Other cards for Home Assistant dashboards from the same author:
-
 - [Simple Weather Card](https://github.com/I-Simen-I/simple-weather-card): a minimalistic weather card with a forecast, day and night icons and a visual editor.
 - [HA Scene Card](https://github.com/I-Simen-I/ha-scene-card): a row of buttons that shows which scenes are active, with the active scene in color. Works for switches, lights and helpers too.
 
