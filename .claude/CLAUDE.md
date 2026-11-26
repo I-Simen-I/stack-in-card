@@ -203,6 +203,9 @@ frontend repo (`home-assistant/frontend`), especially
 - Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): Compare
   and Gallery (the README images, see `dev/README.md`), Basics (both modes next to HA's
   own stacks with the same cards) and Nested.
+- The demo has only outdoor sensors; `configuration.yaml` adds template
+  sensors `sensor.indoor_temperature` and `sensor.indoor_humidity` (fixed
+  values) for the living room card.
 - `dev-loader.js` imports the card with `?t=<now>`, because HA serves
   `/local/` with a 31 day cache. Other files in `www/` need a hard refresh.
 - Changes to `configuration.yaml` need `docker restart stack-in-card-ha`.

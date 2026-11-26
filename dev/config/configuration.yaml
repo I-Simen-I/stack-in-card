@@ -21,6 +21,23 @@ homeassistant:
       allow_bypass_login: true
     - type: homeassistant
 
+# Indoor sensors for the living room card in the Gallery view; the demo
+# only has outdoor ones
+template:
+  - sensor:
+      - name: Indoor temperature
+        unique_id: indoor_temperature
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        state: "21.5"
+      - name: Indoor humidity
+        unique_id: indoor_humidity
+        unit_of_measurement: "%"
+        device_class: humidity
+        state_class: measurement
+        state: "41"
+
 frontend:
   extra_module_url:
     - /local/dev-loader.js

@@ -119,8 +119,8 @@ cards:
       - switch.decorative_lights
   - type: glance
     entities:
-      - sensor.outside_temperature
-      - sensor.outside_humidity
+      - sensor.indoor_temperature
+      - sensor.indoor_humidity
       - sensor.carbon_dioxide
   - type: thermostat
     entity: climate.living_room
