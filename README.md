@@ -6,7 +6,7 @@
 
 Group several cards into one card on your [Home Assistant](https://www.home-assistant.io/) dashboards, without the borders, shadows and gaps between them.
 
-![Stack In Card with different cards merged into one](/images/gallery.png)
+![Stack In Card next to Home Assistant's vertical stack with the same cards](/images/gallery.png)
 
 > A fork of [stack-in-card](https://github.com/custom-cards/stack-in-card) by [@RomRider](https://github.com/RomRider), kept up to date with current Home Assistant releases.
 
@@ -88,6 +88,44 @@ card_mod:
 
 ## Examples
 
+### Weather with a row of buttons, and a room
+
+![A weather card with a row of buttons, and a living room card with lights, sensors and a thermostat](/images/demo.png)
+
+The row of buttons is a `horizontal-stack` inside the card; nested stacks are merged too.
+
+```yaml
+type: custom:stack-in-card
+cards:
+  - type: weather-forecast
+    entity: weather.home
+  - type: horizontal-stack
+    cards:
+      - type: button
+        entity: light.bedroom
+      - type: button
+        entity: light.ceiling_lights
+      - type: button
+        entity: light.kitchen
+```
+
+```yaml
+type: custom:stack-in-card
+title: Living room
+cards:
+  - type: entities
+    entities:
+      - light.ceiling_lights
+      - switch.decorative_lights
+  - type: glance
+    entities:
+      - sensor.outside_temperature
+      - sensor.outside_humidity
+      - sensor.carbon_dioxide
+  - type: thermostat
+    entity: climate.living_room
+```
+
 ### Horizontal
 
 ```yaml
@@ -98,26 +136,6 @@ cards:
     entity: light.kitchen_lights
   - type: button
     entity: light.bed_light
-```
-
-### Nested stacks
-
-Stacks inside the card are merged too, here a row of buttons below a weather card:
-
-```yaml
-type: custom:stack-in-card
-title: Living room
-cards:
-  - type: weather-forecast
-    entity: weather.home
-  - type: horizontal-stack
-    cards:
-      - type: button
-        entity: light.ceiling_lights
-      - type: button
-        entity: light.floor_lamp
-      - type: button
-        entity: switch.tv
 ```
 
 ## Translations

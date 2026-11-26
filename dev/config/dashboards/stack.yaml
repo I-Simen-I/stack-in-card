@@ -3,6 +3,33 @@
 title: Stack in card
 views:
   # For images/gallery.png in the README, see dev/README.md
+  - title: Compare
+    path: compare
+    cards:
+      - type: custom:stack-in-card
+        title: Stack In Card
+        cards: &compare
+          - type: weather-forecast
+            entity: weather.demo_weather_south
+            forecast_type: daily
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: light.bed_light
+              - type: button
+                entity: light.ceiling_lights
+              - type: button
+                entity: light.kitchen_lights
+              - type: button
+                entity: light.office_rgbw_lights
+          - type: alarm-panel
+            entity: alarm_control_panel.security
+            name: Security
+      - type: vertical-stack
+        title: Vertical stack
+        cards: *compare
+
+  # For images/demo.png in the README, see dev/README.md
   - title: Gallery
     path: gallery
     cards:
@@ -10,7 +37,6 @@ views:
         cards:
           - type: weather-forecast
             entity: weather.demo_weather_south
-            show_forecast: true
           - type: horizontal-stack
             cards:
               - type: button

@@ -54,10 +54,12 @@ Claude's responsibility. Work like an owner:
 - `.github/workflows/` – build (typecheck, lint, formatting, build, test,
   artifact), release (manual button), labeler, HACS validation.
 - `dev/` – local Home Assistant in Docker for manual testing.
-- `images/gallery.png` – the README image, still upstream's screenshot from
-  2020 until Simen takes a new one from the Gallery view. `images/editor.png`
-  (as in simple-weather-card) doesn't exist yet; add it to the README's
-  Visual editor section when it does.
+- `images/` – README images, taken by Simen from the test dashboard (see
+  `dev/README.md`): `gallery.png` (top: the card next to HA's vertical
+  stack, Compare view) and `demo.png` (first example, Gallery view; its
+  YAML in the README matches the view). `editor.png`, as in
+  simple-weather-card, doesn't exist yet; add it to the README's Visual
+  editor section when it does.
 
 ## Commands
 
@@ -198,8 +200,8 @@ frontend repo (`home-assistant/frontend`), especially
   container `stack-in-card-ha`; both forks have `dev/docker-compose.yml`, so
   without the `name:` the projects clash and one replaces the other's
   container.
-- Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): Gallery
-  (the README image, see `dev/README.md`), Basics (both modes next to HA's
+- Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): Compare
+  and Gallery (the README images, see `dev/README.md`), Basics (both modes next to HA's
   own stacks with the same cards) and Nested.
 - `dev-loader.js` imports the card with `?t=<now>`, because HA serves
   `/local/` with a 31 day cache. Other files in `www/` need a hard refresh.
