@@ -34,11 +34,12 @@ test("registers the card and logs its version", () => {
     window.customCards.some((c) => c.type === "stack-in-card"),
     "card is not added to window.customCards",
   );
+  // `dev` locally, the release tag when the release workflow builds it
   assert.ok(
-    infoLogs.some(
-      (log) => log.includes("Stack In Card") && log.includes("dev"),
+    infoLogs.some((log) =>
+      /Stack In Card %c (dev|v\d+\.\d+\.\d+(-beta-\d+)?) /.test(log),
     ),
-    "no version banner",
+    infoLogs.join("\n"),
   );
 });
 
