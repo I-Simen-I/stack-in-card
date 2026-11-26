@@ -235,6 +235,25 @@ test("gives the cards in the corners its rounded corners", async () => {
   card.remove();
 });
 
+test("rounds the corners also when it's moved before they're set", async () => {
+  // Like a masonry view: the card renders before it's on the page, and is
+  // moved into its column right after
+  const card = document.createElement("stack-in-card");
+  card.setConfig({ cards: CARDS });
+  card.hass = HASS;
+  await wait(20);
+  document.body.appendChild(card);
+  card.remove();
+  card.shadowRoot.querySelector("ha-card").style.borderRadius = "12px";
+  document.body.appendChild(card);
+  await restyled();
+  assert.deepEqual(stackOf(card).cards.map(radiusOf), [
+    "12px 12px 0px 0px",
+    "0px 0px 12px 12px",
+  ]);
+  card.remove();
+});
+
 test("rounds the corners of a horizontal stack, and not under a title", async () => {
   const horizontal = await createRoundCard({ mode: "horizontal" });
   assert.deepEqual(stackOf(horizontal).cards.map(radiusOf), [

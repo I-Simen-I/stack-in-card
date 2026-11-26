@@ -118,8 +118,10 @@ Use these instead of doing the steps by hand; they hold the details.
   `transition: all 0.3s`, so styles set after render show the borders
   fading out on every page load.
 - As a fallback for cards with their own styles, the card also walks the
-  DOM when a stack is shown (`_styleTree`), and again after 500 ms for
-  cards that render late: in a shadow root it merges the
+  DOM when a stack is shown and whenever the card is put on the page
+  (`_styleTree`; dashboards render cards off the page and then move them,
+  which cancels the timer), and again after 500 ms for cards that render
+  late: in a shadow root it merges the
   `ha-card`, or, in stacks, goes through the `#root` (or `#card`) container
   and its children; in the light DOM (`hui-card`) it goes through the
   children. Inline styles: `background`, `border`, `border-radius`,

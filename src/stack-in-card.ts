@@ -177,6 +177,13 @@ export class StackInCard extends HTMLElement {
     return card ? computeCardSize(card) : 0;
   }
 
+  // Dashboards render cards before they're on the page and move them
+  // around (masonry columns, views), which stops the second styling pass.
+  // The corners can only be read on the page, so style again here.
+  connectedCallback(): void {
+    if (this._card) this._styleStack(this._card);
+  }
+
   disconnectedCallback(): void {
     clearTimeout(this._restyleTimer);
   }
