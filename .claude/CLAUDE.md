@@ -41,8 +41,9 @@ code itself is Claude's responsibility. Work like an owner:
 
 - `src/stack-in-card.ts` – the card. `src/editor.ts` – visual editor,
   imported by the card into the same bundle. `src/card-helpers.ts` – loads
-  `window.loadCardHelpers()` once. `src/types.ts` – config and the few Home
-  Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
+  `window.loadCardHelpers()` once. `src/config.ts` – the mode and the HA
+  stack config, shared by card and editor. `src/types.ts` – config and the
+  few Home Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
 - No translation files: the editor's three labels come from Home
   Assistant's own translations (`hass.localize`), see `LABELS` in
   `src/editor.ts`.

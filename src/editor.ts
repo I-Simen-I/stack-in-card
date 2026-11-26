@@ -1,4 +1,5 @@
 import { loadCardHelpers } from "./card-helpers";
+import { modeOf, stackConfigOf } from "./config";
 import {
   HomeAssistant,
   LovelaceCardConfig,
@@ -131,7 +132,7 @@ export class StackInCardEditor extends HTMLElement {
     this._form.hass = this._hass;
     this._form.schema = this._schemas.mode;
     // A new data object makes ha-form render again, so only on a change
-    const mode = this._config.mode ?? "vertical";
+    const mode = modeOf(this._config);
     const data = this._form.data as { mode?: string } | undefined;
     if (data?.mode !== mode) this._form.data = { mode };
 
@@ -145,10 +146,7 @@ export class StackInCardEditor extends HTMLElement {
   // Home Assistant's stack editor rejects options it doesn't know, so it
   // only gets the title and the cards
   private _stackConfig(config: StackInCardConfig): LovelaceCardConfig {
-    const stack: LovelaceCardConfig = {
-      type: `${config.mode ?? "vertical"}-stack`,
-      cards: config.cards,
-    };
+    const stack = stackConfigOf(config);
     if (config.title) stack.title = config.title;
     return stack;
   }

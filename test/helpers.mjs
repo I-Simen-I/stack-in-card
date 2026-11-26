@@ -156,13 +156,17 @@ const defineFakeCards = () => {
     get hass() {
       return this._hass;
     }
+
+    cardSizes() {
+      return Promise.all(this.cards.map((card) => card.getCardSize()));
+    }
   }
 
   customElements.define(
     "hui-vertical-stack-card",
     class extends FakeStack {
       async getCardSize() {
-        const sizes = await Promise.all(this.cards.map((c) => c.getCardSize()));
+        const sizes = await this.cardSizes();
         return sizes.reduce((sum, size) => sum + size, 0);
       }
     },
@@ -172,8 +176,7 @@ const defineFakeCards = () => {
     "hui-horizontal-stack-card",
     class extends FakeStack {
       async getCardSize() {
-        const sizes = await Promise.all(this.cards.map((c) => c.getCardSize()));
-        return Math.max(...sizes);
+        return Math.max(...(await this.cardSizes()));
       }
     },
   );
@@ -206,11 +209,13 @@ export const stackOf = (card) =>
 
 export const rootOf = (stack) => stack.shadowRoot.getElementById("root");
 
+// The cards in a stack, inside their hui-cards
+export const cardsOf = (stack) =>
+  stack.cards.map((huiCard) => huiCard.firstElementChild);
+
 // The ha-card of each card in a stack
 export const haCardsOf = (stack) =>
-  stack.cards.map((huiCard) =>
-    huiCard.firstElementChild.shadowRoot.querySelector("ha-card"),
-  );
+  cardsOf(stack).map((card) => card.shadowRoot.querySelector("ha-card"));
 
 // Creates the visual editor and waits until the stack editor is in it
 export const createEditor = async (config, hass = HASS) => {

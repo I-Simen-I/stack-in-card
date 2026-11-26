@@ -1,4 +1,5 @@
 import { loadCardHelpers } from "./card-helpers";
+import { modeOf, stackConfigOf } from "./config";
 import "./editor";
 import {
   HomeAssistant,
@@ -33,14 +34,13 @@ const afterUpdate = async (element: Element): Promise<void> => {
   await (element as { updateComplete?: Promise<unknown> }).updateComplete;
 };
 
-// Home Assistant's cards and stacks read these variables, so they are
-// merged from their first paint. The card doesn't clip what's inside it
-// (no overflow: hidden), so menus and tooltips of the cards inside can reach
-// outside it; the cards in its corners get its rounded corners instead (see
-// _styleTree). Styles set after they have rendered (see
-// _styleTree) show their borders first, fading out with ha-card's 0.3s
+// The variables in .stack merge Home Assistant's cards and stacks from their
+// first paint, since they read them. Styles set after they have rendered
+// (_styleTree) show their borders first, fading out with ha-card's 0.3s
 // transition. The variables only reach the cards inside, not this card's
-// own ha-card.
+// own ha-card. That ha-card doesn't clip (no overflow: hidden), so menus of
+// the cards inside can reach outside it; _styleTree gives the cards in its
+// corners its rounded corners instead.
 const STYLES = `
   /* Fill the height a sections dashboard gives the card (its rows) */
   :host {
@@ -84,7 +84,9 @@ const mergeHaCard = (card: HTMLElement): void => {
 // Radius of each corner: top left, top right, bottom right, bottom left
 type Corners = [string, string, string, string];
 
-const NO_CORNERS: Corners = ["0px", "0px", "0px", "0px"];
+const SQUARE = "0px";
+
+const NO_CORNERS: Corners = [SQUARE, SQUARE, SQUARE, SQUARE];
 
 // The corners of a stack that the card at `index` touches
 const childCorners = (
@@ -96,14 +98,16 @@ const childCorners = (
   const first = index === 0;
   const last = index === count - 1;
   const [tl, tr, br, bl] = corners;
-  const pick = (corner: string, touches: boolean) => (touches ? corner : "0px");
+  const pick = (corner: string, touches: boolean) =>
+    touches ? corner : SQUARE;
   if (layout === "vertical") {
     return [pick(tl, first), pick(tr, first), pick(br, last), pick(bl, last)];
   }
   if (layout === "horizontal") {
     return [pick(tl, first), pick(tr, last), pick(br, last), pick(bl, first)];
   }
-  // Grids and unknown containers: only a single card fills the corners
+  // Grids, unknown containers and wrappers like hui-card: only a single
+  // card fills the corners
   return count === 1 ? corners : NO_CORNERS;
 };
 
@@ -137,15 +141,15 @@ const setSize = (
   size: number | undefined,
 ): void => {
   const card = huiCard.firstElementChild as HTMLElement | null;
+  const share = (weight: number) => `${weight} ${weight} 0`;
   if (layout === "horizontal") {
     // hui-card is display: contents here, so the card is the flex item
-    const weight = size ?? 1;
-    card?.style.setProperty("flex", `${weight} ${weight} 0`);
+    if (card) card.style.flex = share(size ?? 1);
     return;
   }
-  huiCard.style.flex = size ? `${size} ${size} 0` : "0 0 auto";
+  huiCard.style.flex = size ? share(size) : "0 0 auto";
   huiCard.style.minHeight = "0";
-  if (size) card?.style.setProperty("height", "100%");
+  if (size && card) card.style.height = "100%";
 };
 
 const computeCardSize = (card: LovelaceCard): number | Promise<number> => {
@@ -219,12 +223,12 @@ export class StackInCard extends HTMLElement {
     if (!config || !Array.isArray(config.cards)) {
       throw new Error("Add the cards to stack under `cards`");
     }
-    const mode = config.mode ?? "vertical";
+    const mode = modeOf(config);
     if (!MODES.includes(mode)) {
       throw new Error(`Unknown mode: ${mode}. Use vertical or horizontal`);
     }
     this._config = config;
-    this._createStack({ type: `${mode}-stack`, cards: config.cards });
+    this._createStack(stackConfigOf(config));
   }
 
   async getCardSize(): Promise<number> {
@@ -295,11 +299,11 @@ export class StackInCard extends HTMLElement {
     const haCard = this.shadowRoot?.querySelector("ha-card");
     if (!haCard?.isConnected) return NO_CORNERS;
     const style = getComputedStyle(haCard);
-    const radius = (corner: string) => style.getPropertyValue(corner) || "0px";
+    const radius = (corner: string) => style.getPropertyValue(corner) || SQUARE;
     const top = !haCard.hasAttribute("header");
     return [
-      top ? radius("border-top-left-radius") : "0px",
-      top ? radius("border-top-right-radius") : "0px",
+      top ? radius("border-top-left-radius") : SQUARE,
+      top ? radius("border-top-right-radius") : SQUARE,
       radius("border-bottom-right-radius"),
       radius("border-bottom-left-radius"),
     ];
@@ -338,14 +342,13 @@ export class StackInCard extends HTMLElement {
     // A wrapper like hui-card: its card fills the same corners
     const haCard = element.querySelector<HTMLElement>("ha-card");
     if (haCard) mergeHaCard(haCard);
-    this._styleChildren(element, corners, undefined, true);
+    this._styleChildren(element, corners);
   }
 
   private _styleChildren(
     parent: Element,
     corners: Corners,
     layout?: Mode,
-    wrapper = false,
   ): void {
     const children = Array.from(parent.children).filter(
       (child): child is HTMLElement => child instanceof HTMLElement,
@@ -356,9 +359,7 @@ export class StackInCard extends HTMLElement {
     const sized = sizes.some((size) => size !== undefined);
     children.forEach((child, index) => {
       if (layout && sized) setSize(child, layout, sizes[index]);
-      const own = wrapper
-        ? corners
-        : childCorners(corners, layout, index, children.length);
+      const own = childCorners(corners, layout, index, children.length);
       child.style.margin = "0px";
       child.style.setProperty("--ha-card-border-radius", own.join(" "));
       this._styleTree(child, own);

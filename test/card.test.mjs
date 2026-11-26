@@ -14,6 +14,7 @@ import {
   stackOf,
   rootOf,
   haCardsOf,
+  cardsOf,
 } from "./helpers.mjs";
 
 setupDom();
@@ -313,7 +314,7 @@ test("gives cards in a horizontal stack the width of their columns", async () =>
       { type: "test", grid_options: { columns: "full" } },
     ],
   });
-  const cards = stackOf(card).cards.map((huiCard) => huiCard.firstElementChild);
+  const cards = cardsOf(stackOf(card));
   assert.deepEqual(cards.map(flexOf).map(normalizeFlex), [
     "2 2 0",
     "1 1 0",
@@ -337,7 +338,7 @@ test("gives cards in a vertical stack the height of their rows", async () => {
     "1 1 0",
   ]);
   assert.deepEqual(
-    huiCards.map((huiCard) => huiCard.firstElementChild.style.height),
+    cardsOf(stackOf(card)).map((inner) => inner.style.height),
     ["100%", "", "100%"],
   );
   card.remove();
@@ -355,9 +356,7 @@ test("sizes cards in nested stacks, and leaves stacks without sizes alone", asyn
   });
   const [plain, row] = stackOf(card).cards;
   assert.equal(flexOf(plain), "", "the outer stack sets no sizes");
-  const rowCards = row.firstElementChild.cards.map(
-    (huiCard) => huiCard.firstElementChild,
-  );
+  const rowCards = cardsOf(row.firstElementChild);
   assert.deepEqual(rowCards.map(flexOf).map(normalizeFlex), ["3 3 0", "1 1 0"]);
   card.remove();
 });
@@ -401,9 +400,7 @@ test("merges nested stacks and nested stack-in-cards", async () => {
     ],
   });
   await restyled();
-  const [nestedStack, nestedStackInCard] = stackOf(card).cards.map(
-    (huiCard) => huiCard.firstElementChild,
-  );
+  const [nestedStack, nestedStackInCard] = cardsOf(stackOf(card));
 
   assert.equal(rootOf(nestedStack).style.gap, "0");
   for (const haCard of haCardsOf(nestedStack)) assertMerged(haCard);
