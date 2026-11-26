@@ -8,8 +8,8 @@ so they look like one card. Fork of custom-cards/stack-in-card (RomRider),
 whose last release was 0.2.0 in 2020. Code, commits, PRs, README and release
 notes are in English.
 
-The sister fork I-Simen-I/simple-weather-card, by the same owner, is the
-reference for tooling, tests, CI, docs and workflow. Keep the two in
+The reference for tooling, tests, CI, docs and workflow is
+[I-Simen-I/simple-weather-card](https://github.com/I-Simen-I/simple-weather-card). Keep the two in
 step: copy its setup instead of inventing a new one. Deviations on purpose
 are listed under Decisions.
 
