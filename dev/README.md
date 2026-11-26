@@ -54,6 +54,10 @@ cards with Cmd+Shift+4 (drag around them).
   vertical card next to Home Assistant's vertical stack.
 - `images/demo_3.png`: the horizontal card and Home Assistant's horizontal
   stack below it, in the **Basics** view.
+- `images/demo_4.png`: the first two cards in the **Overflow** view, the
+  open menu reaching outside the card.
+- `images/demo_5.png`: the two cards with pictures in the **Overflow**
+  view, the pictures following the rounded corners.
 
 The README's examples show the same cards as these views.
 
