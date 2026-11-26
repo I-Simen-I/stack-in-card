@@ -6,7 +6,7 @@
 
 Group several cards into one card on your [Home Assistant](https://www.home-assistant.io/) dashboards, without the borders, shadows and gaps between them.
 
-![Stack In Card next to Home Assistant's vertical stack with the same cards](/images/gallery.png)
+![Stack In Card next to Home Assistant's vertical stack with the same cards](/images/main.png)
 
 > A fork of [stack-in-card](https://github.com/custom-cards/stack-in-card) by [@RomRider](https://github.com/RomRider), kept up to date with current Home Assistant releases.
 
@@ -90,7 +90,7 @@ card_mod:
 
 ### Weather with a row of buttons, and a room
 
-![A weather card with a row of buttons, and a living room card with lights, sensors and a thermostat](/images/demo.png)
+![A weather card with a row of buttons, and a living room card with lights, sensors and a thermostat](/images/demo_1.png)
 
 The row of buttons is a `horizontal-stack` inside the card; nested stacks are merged too.
 
@@ -126,16 +126,49 @@ cards:
     entity: climate.living_room
 ```
 
-### Horizontal
+### Compared with Home Assistant's stacks
+
+The same cards in Stack In Card (left) and Home Assistant's vertical stack (right):
+
+![The same cards in Stack In Card and in Home Assistant's vertical stack](/images/demo_2.png)
 
 ```yaml
 type: custom:stack-in-card
+title: Vertical (default)
+cards:
+  - type: entities
+    entities:
+      - light.bed_light
+      - light.ceiling_lights
+  - type: glance
+    entities:
+      - sensor.outside_temperature
+      - sensor.outside_humidity
+  - type: horizontal-stack
+    cards:
+      - type: button
+        entity: light.kitchen_lights
+      - type: button
+        entity: switch.decorative_lights
+```
+
+### Horizontal
+
+Stack In Card with `mode: horizontal` (top) and Home Assistant's horizontal stack (bottom):
+
+![Three buttons in Stack In Card and in Home Assistant's horizontal stack](/images/demo_3.png)
+
+```yaml
+type: custom:stack-in-card
+title: Horizontal
 mode: horizontal
 cards:
   - type: button
-    entity: light.kitchen_lights
-  - type: button
     entity: light.bed_light
+  - type: button
+    entity: light.ceiling_lights
+  - type: button
+    entity: light.kitchen_lights
 ```
 
 ## Translations

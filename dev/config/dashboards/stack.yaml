@@ -2,7 +2,7 @@
 # Assistant's own stack with the same cards, to compare.
 title: Stack in card
 views:
-  # For images/gallery.png in the README, see dev/README.md
+  # For images/main.png in the README, see dev/README.md
   - title: Compare
     path: compare
     cards:
@@ -29,7 +29,7 @@ views:
         title: Vertical stack
         cards: *compare
 
-  # For images/demo.png in the README, see dev/README.md
+  # For images/demo_1.png in the README, see dev/README.md
   - title: Gallery
     path: gallery
     cards:
@@ -60,6 +60,7 @@ views:
           - type: thermostat
             entity: climate.ecobee
 
+  # Its first four cards are images/demo_2.png and demo_3.png
   - title: Basics
     path: basics
     cards:

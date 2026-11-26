@@ -55,9 +55,10 @@ Claude's responsibility. Work like an owner:
   artifact), release (manual button), labeler, HACS validation.
 - `dev/` – local Home Assistant in Docker for manual testing.
 - `images/` – README images, taken by Simen from the test dashboard (see
-  `dev/README.md`): `gallery.png` (top: the card next to HA's vertical
-  stack, Compare view) and `demo.png` (first example, Gallery view; its
-  YAML in the README matches the view). `editor.png`, as in
+  `dev/README.md`): `main.png` (top: the card next to HA's vertical
+  stack, Compare view) and `demo_1.png`–`demo_3.png` (one per example,
+  Gallery and Basics views). The README's examples show the same cards as the views;
+  change both together. `editor.png`, as in
   simple-weather-card, doesn't exist yet; add it to the README's Visual
   editor section when it does.
 

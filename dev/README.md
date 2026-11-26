@@ -41,10 +41,17 @@ it to start over from a fresh install.
 Set your profile language to English and collapse the sidebar. Take the
 cards with Cmd+Shift+4 (drag around them).
 
-- `images/gallery.png`: the **Compare** view, the card next to Home
+- `images/main.png`: the **Compare** view, the card next to Home
   Assistant's vertical stack with the same cards.
-- `images/demo.png`: the **Gallery** view, the card with the cards people
-  stack most. The README's first example has the same YAML.
+- `images/demo_1.png`: the **Gallery** view, the card with the cards
+  people stack most.
+- `images/demo_2.png`: the first two cards in the **Basics** view, the
+  vertical card next to Home Assistant's vertical stack.
+- `images/demo_3.png`: the horizontal card and Home Assistant's horizontal
+  stack below it, in the **Basics** view.
+
+The README's examples show the same cards as these views.
+
 - `images/editor.png`: edit the first card in the Gallery view and take
   the editor dialog.
 
