@@ -16,3 +16,4 @@ package-lock.json
 /dev/config/www/*
 !/dev/config/www/dev-loader.js
 !/dev/config/www/dev-popup-card.js
+!/dev/config/www/dev-picture.svg

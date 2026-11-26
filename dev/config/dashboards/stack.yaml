@@ -137,7 +137,7 @@ views:
         title: Stack In Card
         cards: &overflow
           - type: picture
-            image: /static/images/card_media_player_bg.png
+            image: /local/dev-picture.svg
           - type: history-graph
             hours_to_show: 24
             entities:
@@ -157,4 +157,4 @@ views:
             entities:
               - light.bed_light
           - type: picture
-            image: /static/images/card_media_player_bg.png
+            image: /local/dev-picture.svg

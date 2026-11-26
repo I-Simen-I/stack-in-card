@@ -35,6 +35,8 @@ yarn ha:down        # stop the container
   reaching outside the card)
 - `config/www/dev-popup-card.js`: a card with an always open menu, drawn
   like custom cards draw theirs, for the Overflow view
+- `config/www/dev-picture.svg`: a colorful picture for the Overflow view,
+  to see whether pictures in the corners follow the rounded corners
 
 Everything else Home Assistant writes to `config/` is ignored by git. Delete
 it to start over from a fresh install.
