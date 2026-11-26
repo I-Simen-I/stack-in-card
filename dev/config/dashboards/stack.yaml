@@ -127,3 +127,34 @@ views:
       - type: custom:stack-in-card
         title: Empty (shows nothing outside the editor)
         cards: []
+
+  # Content that reaches outside the card (upstream #5, #40): menus,
+  # tooltips and pictures in the corners, next to HA's own stack
+  - title: Overflow
+    path: overflow
+    cards:
+      - type: custom:stack-in-card
+        title: Stack In Card
+        cards: &overflow
+          - type: picture
+            image: /static/images/card_media_player_bg.png
+          - type: history-graph
+            hours_to_show: 24
+            entities:
+              - sensor.indoor_temperature
+              - sensor.outside_temperature
+          - type: entities
+            entities:
+              - select.speed
+          - type: custom:dev-popup-card
+      - type: vertical-stack
+        title: Home Assistant's vertical stack
+        cards: *overflow
+      - type: custom:stack-in-card
+        title: Picture at the bottom
+        cards:
+          - type: entities
+            entities:
+              - light.bed_light
+          - type: picture
+            image: /static/images/card_media_player_bg.png

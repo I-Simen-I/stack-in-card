@@ -41,6 +41,7 @@ template:
 frontend:
   extra_module_url:
     - /local/dev-loader.js
+    - /local/dev-popup-card.js
 
 lovelace:
   dashboards:
