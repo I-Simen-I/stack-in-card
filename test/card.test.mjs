@@ -21,7 +21,11 @@ setupDom();
 const assertMerged = (haCard) => {
   assert.equal(haCard.style.background, "transparent");
   assert.equal(haCard.style.borderStyle, "none", "border");
-  assert.equal(haCard.style.borderRadius, "0px");
+  assert.equal(
+    haCard.style.borderRadius,
+    "var(--ha-card-border-radius, 0px)",
+    "corners",
+  );
   assert.equal(haCard.style.boxShadow, "none");
 };
 
@@ -187,6 +191,79 @@ test("merges the cards from their first paint with HA's CSS variables", async ()
     assert.match(rule, new RegExp(`${name}:\\s*${value};`), name);
   }
   card.remove();
+});
+
+test("doesn't clip the cards inside, so their menus can reach outside", async () => {
+  const card = await createCard();
+  const css = card.shadowRoot.querySelector("style").textContent;
+  assert.doesNotMatch(css, /overflow/);
+  card.remove();
+});
+
+// The corners each card in a stack gets
+const radiusOf = (element) =>
+  element.style.getPropertyValue("--ha-card-border-radius");
+
+// A card whose own ha-card has 12px corners, like the default theme
+const createRoundCard = async (config) => {
+  const card = await createCard(config);
+  card.shadowRoot.querySelector("ha-card").style.borderRadius = "12px";
+  await restyled();
+  return card;
+};
+
+test("gives the cards in the corners its rounded corners", async () => {
+  const card = await createRoundCard({
+    cards: [
+      { type: "test" },
+      { type: "test" },
+      { type: "horizontal-stack", cards: [CARDS[0], CARDS[0], CARDS[0]] },
+    ],
+  });
+  const [top, middle, bottom] = stackOf(card).cards;
+  assert.equal(radiusOf(top), "12px 12px 0px 0px");
+  assert.equal(radiusOf(middle), "0px 0px 0px 0px");
+  assert.equal(radiusOf(bottom), "0px 0px 12px 12px");
+
+  // A row of cards at the bottom: the outer ones get one corner each
+  const row = bottom.firstElementChild.cards;
+  assert.deepEqual(row.map(radiusOf), [
+    "0px 0px 0px 12px",
+    "0px 0px 0px 0px",
+    "0px 0px 12px 0px",
+  ]);
+  card.remove();
+});
+
+test("rounds the corners of a horizontal stack, and not under a title", async () => {
+  const horizontal = await createRoundCard({ mode: "horizontal" });
+  assert.deepEqual(stackOf(horizontal).cards.map(radiusOf), [
+    "12px 0px 0px 12px",
+    "0px 12px 12px 0px",
+  ]);
+  horizontal.remove();
+
+  const titled = await createRoundCard({ title: "Living room" });
+  assert.deepEqual(stackOf(titled).cards.map(radiusOf), [
+    "0px 0px 0px 0px",
+    "0px 0px 12px 12px",
+  ]);
+  titled.remove();
+
+  const single = await createRoundCard({ cards: [CARDS[0]] });
+  assert.equal(radiusOf(stackOf(single).cards[0]), "12px 12px 12px 12px");
+  single.remove();
+
+  // In a grid it isn't known which card is in which corner
+  const grid = await createRoundCard({
+    cards: [{ type: "grid", cards: CARDS }],
+  });
+  const gridCards = stackOf(grid).cards[0].firstElementChild.cards;
+  assert.deepEqual(gridCards.map(radiusOf), [
+    "0px 0px 0px 0px",
+    "0px 0px 0px 0px",
+  ]);
+  grid.remove();
 });
 
 test("merges cards that render late", async () => {

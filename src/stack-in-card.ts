@@ -33,14 +33,14 @@ const afterUpdate = async (element: Element): Promise<void> => {
 };
 
 // Home Assistant's cards and stacks read these variables, so they are
-// merged from their first paint. Styles set after they have rendered (see
+// merged from their first paint. The card doesn't clip what's inside it
+// (no overflow: hidden), so menus and tooltips of the cards inside can reach
+// outside it; the cards in its corners get its rounded corners instead (see
+// _styleTree). Styles set after they have rendered (see
 // _styleTree) show their borders first, fading out with ha-card's 0.3s
 // transition. The variables only reach the cards inside, not this card's
 // own ha-card.
 const STYLES = `
-  ha-card {
-    overflow: hidden;
-  }
   .stack {
     --ha-card-background: transparent;
     --ha-card-border-width: 0px;
@@ -57,8 +57,40 @@ const mergeHaCard = (card: HTMLElement): void => {
   card.style.background = "transparent";
   // Cards have a border since Home Assistant 2022.11
   card.style.border = "none";
-  card.style.borderRadius = "0";
+  // The corners _styleTree gives the card, or none
+  card.style.borderRadius = "var(--ha-card-border-radius, 0px)";
   card.style.boxShadow = "none";
+};
+
+// Radius of each corner: top left, top right, bottom right, bottom left
+type Corners = [string, string, string, string];
+
+const NO_CORNERS: Corners = ["0px", "0px", "0px", "0px"];
+
+// The corners of a stack that the card at `index` touches
+const childCorners = (
+  corners: Corners,
+  layout: "vertical" | "horizontal" | undefined,
+  index: number,
+  count: number,
+): Corners => {
+  const first = index === 0;
+  const last = index === count - 1;
+  const [tl, tr, br, bl] = corners;
+  const pick = (corner: string, touches: boolean) => (touches ? corner : "0px");
+  if (layout === "vertical") {
+    return [pick(tl, first), pick(tr, first), pick(br, last), pick(bl, last)];
+  }
+  if (layout === "horizontal") {
+    return [pick(tl, first), pick(tr, last), pick(br, last), pick(bl, first)];
+  }
+  // Grids and unknown containers: only a single card fills the corners
+  return count === 1 ? corners : NO_CORNERS;
+};
+
+const STACK_LAYOUTS: Record<string, "vertical" | "horizontal"> = {
+  "hui-vertical-stack-card": "vertical",
+  "hui-horizontal-stack-card": "horizontal",
 };
 
 const computeCardSize = (card: LovelaceCard): number | Promise<number> => {
@@ -186,11 +218,29 @@ export class StackInCard extends HTMLElement {
   }
 
   private _styleStack(card: LovelaceCard): void {
-    this._styleTree(card);
+    this._styleTree(card, this._corners());
     clearTimeout(this._restyleTimer);
     this._restyleTimer = setTimeout(() => {
-      if (card === this._card) this._styleTree(card);
+      if (card === this._card) this._styleTree(card, this._corners());
     }, RESTYLE_DELAY);
+  }
+
+  // The rounded corners of this card's ha-card that the cards inside reach:
+  // all of them, except the top ones under a title. Read from the rendered
+  // card, so they follow the theme, and a nested stack-in-card gets the
+  // corners the outer one gave it.
+  private _corners(): Corners {
+    const haCard = this.shadowRoot?.querySelector("ha-card");
+    if (!haCard?.isConnected) return NO_CORNERS;
+    const style = getComputedStyle(haCard);
+    const radius = (corner: string) => style.getPropertyValue(corner) || "0px";
+    const top = !haCard.hasAttribute("header");
+    return [
+      top ? radius("border-top-left-radius") : "0px",
+      top ? radius("border-top-right-radius") : "0px",
+      radius("border-bottom-right-radius"),
+      radius("border-bottom-left-radius"),
+    ];
   }
 
   // Walks down through stacks and other cards that hold cards, and merges
@@ -199,7 +249,11 @@ export class StackInCard extends HTMLElement {
   // none of it can be turned off. The CSS variables in `STYLES` already do
   // this for cards that use them; this catches the cards that set their own
   // styles, like custom cards.
-  private async _styleTree(element: Element): Promise<void> {
+  //
+  // It also gives every card the corners of this card it touches, as
+  // --ha-card-border-radius, so pictures in the corners follow its rounded
+  // corners without it clipping them.
+  private async _styleTree(element: Element, corners: Corners): Promise<void> {
     await afterUpdate(element);
     const shadow = element.shadowRoot;
 
@@ -215,21 +269,33 @@ export class StackInCard extends HTMLElement {
       if (!container) return;
       // Stacks space their cards with `gap` since Home Assistant 2024.3
       container.style.gap = "0";
-      this._styleChildren(container);
+      this._styleChildren(container, corners, STACK_LAYOUTS[element.localName]);
       return;
     }
 
+    // A wrapper like hui-card: its card fills the same corners
     const haCard = element.querySelector<HTMLElement>("ha-card");
     if (haCard) mergeHaCard(haCard);
-    this._styleChildren(element);
+    this._styleChildren(element, corners, undefined, true);
   }
 
-  private _styleChildren(parent: Element): void {
-    for (const child of Array.from(parent.children)) {
-      if (!(child instanceof HTMLElement)) continue;
+  private _styleChildren(
+    parent: Element,
+    corners: Corners,
+    layout?: "vertical" | "horizontal",
+    wrapper = false,
+  ): void {
+    const children = Array.from(parent.children).filter(
+      (child): child is HTMLElement => child instanceof HTMLElement,
+    );
+    children.forEach((child, index) => {
+      const own = wrapper
+        ? corners
+        : childCorners(corners, layout, index, children.length);
       child.style.margin = "0px";
-      this._styleTree(child);
-    }
+      child.style.setProperty("--ha-card-border-radius", own.join(" "));
+      this._styleTree(child, own);
+    });
   }
 }
 

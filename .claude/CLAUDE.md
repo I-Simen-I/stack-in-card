@@ -125,6 +125,18 @@ Use these instead of doing the steps by hand; they hold the details.
   children. Inline styles: `background`, `border`, `border-radius`,
   `box-shadow` on every `ha-card`, `margin` on the children, `gap` on stack
   roots.
+- The card's own `ha-card` doesn't clip (no `overflow: hidden`, upstream
+  #5/#40), so menus of cards inside, like mini-media-player's own
+  `position: absolute` menu, can reach outside it. Instead, the walk gives
+  each card the corners of the stack it touches as an inline
+  `--ha-card-border-radius` ("tl tr br bl", `childCorners`): first/last
+  card of a vertical stack get the top/bottom corners, of a horizontal one
+  the left/right corners, nested stacks pass them on, and cards in grids or
+  unknown containers get none unless they're alone. The radii are read from
+  the card's own rendered `ha-card` (`_corners`), without the top ones under
+  a title, so they follow the theme and a nested stack-in-card passes on
+  the corners it got. Merged `ha-card`s use
+  `border-radius: var(--ha-card-border-radius, 0px)`.
 - A nested `stack-in-card` gets its `ha-card` merged like any card, and
   merges its own cards.
 - Cards inside are created and rendered by Home Assistant as usual, with
@@ -206,6 +218,10 @@ frontend repo (`home-assistant/frontend`), especially
 - Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): Compare
   and Gallery (the README images, see `dev/README.md`), Basics (both modes next to HA's
   own stacks with the same cards) and Nested.
+- Overflow view: a picture, a history graph, a `select` row and
+  `dev-popup-card` (an always open `position: absolute` menu, like custom
+  cards draw) next to HA's vertical stack, and a picture at the bottom: for
+  clipped menus and the rounded corners.
 - The demo has only outdoor sensors; `configuration.yaml` adds template
   sensors `sensor.indoor_temperature` and `sensor.indoor_humidity` (fixed
   values) for the living room card.

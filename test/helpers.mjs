@@ -38,6 +38,7 @@ const createCardElement = (config) => {
     {
       "vertical-stack": "hui-vertical-stack-card",
       "horizontal-stack": "hui-horizontal-stack-card",
+      grid: "hui-grid-card",
       "custom:stack-in-card": "stack-in-card",
     }[config.type] ?? "test-card";
   const element = document.createElement(tag);
@@ -171,6 +172,8 @@ const defineFakeCards = () => {
       }
     },
   );
+
+  customElements.define("hui-grid-card", class extends FakeStack {});
 };
 
 export const HASS = { states: {} };

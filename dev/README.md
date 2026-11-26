@@ -31,7 +31,10 @@ yarn ha:down        # stop the container
 - `config/configuration.yaml`: demo integration, card loaded via
   `frontend.extra_module_url`, and the dashboard below
 - `config/dashboards/stack.yaml`: test cards (the README images, both
-  modes next to Home Assistant's own stacks, nested stacks)
+  modes next to Home Assistant's own stacks, nested stacks, content
+  reaching outside the card)
+- `config/www/dev-popup-card.js`: a card with an always open menu, drawn
+  like custom cards draw theirs, for the Overflow view
 
 Everything else Home Assistant writes to `config/` is ignored by git. Delete
 it to start over from a fresh install.
