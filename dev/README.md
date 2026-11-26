@@ -52,8 +52,8 @@ cards with Cmd+Shift+4 (drag around them).
 
 The README's examples show the same cards as these views.
 
-- `images/editor.png`: edit the first card in the Gallery view and take
-  the editor dialog.
+- `images/editor.png`: edit the Stack In Card in the **Compare** view and
+  take the editor dialog.
 
 ## Releasing
 

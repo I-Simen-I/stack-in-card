@@ -55,6 +55,8 @@ From Home Assistant 2026.11, HACS is built in as the **Marketplace** (Settings â
 
 Add the card from the card picker; it starts with a weather card above three buttons side by side. In the editor, choose the layout (vertical or horizontal stack), set a title, and add, move, copy and edit the cards with the same tabs as Home Assistant's own stacks.
 
+![The editor with the layout, the title and a tab per card, next to the preview](/images/editor.png)
+
 ### YAML
 
 Add the cards to stack under `cards`, as you would in a vertical stack:

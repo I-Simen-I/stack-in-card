@@ -58,9 +58,8 @@ Claude's responsibility. Work like an owner:
   `dev/README.md`): `main.png` (top: the card next to HA's vertical
   stack, Compare view) and `demo_1.png`–`demo_3.png` (one per example,
   Gallery and Basics views). The README's examples show the same cards as the views;
-  change both together. `editor.png`, as in
-  simple-weather-card, doesn't exist yet; add it to the README's Visual
-  editor section when it does.
+  change both together. `editor.png` (the editor, from the Compare view) is in the README's Visual
+  editor section, as in simple-weather-card.
 
 ## Commands
 
