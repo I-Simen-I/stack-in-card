@@ -138,7 +138,7 @@ yarn ha:up       # local Home Assistant with demo data on http://localhost:8124 
 
 The local test environment and the release process are described in [`dev/README.md`](dev/README.md).
 
-Built with TypeScript, Lit 3 and webpack.
+Built with TypeScript and webpack, without runtime dependencies.
 
 ## License
 

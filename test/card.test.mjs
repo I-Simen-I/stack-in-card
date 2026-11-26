@@ -171,7 +171,7 @@ test("merges the cards from their first paint with HA's CSS variables", async ()
   const card = await createCard();
   const wrapper = card.shadowRoot.querySelector("ha-card > .stack");
   assert.equal(wrapper.firstElementChild, stackOf(card));
-  const css = customElements.get("stack-in-card").styles.cssText;
+  const css = card.shadowRoot.querySelector("style").textContent;
   const rule = /\.stack\s*{([^}]*)}/.exec(css)?.[1] ?? "";
   for (const [name, value] of [
     ["--ha-card-background", "transparent"],

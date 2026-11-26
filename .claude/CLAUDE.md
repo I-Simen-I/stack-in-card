@@ -1,6 +1,6 @@
 # Stack In Card
 
-A Home Assistant dashboard card (Lit 3, TypeScript, webpack), distributed as
+A Home Assistant dashboard card (TypeScript, webpack, no Lit), distributed as
 one file, `dist/stack-in-card.js`, through the Marketplace/HACS. It wraps a
 `vertical-stack` or `horizontal-stack` in one `ha-card` and strips the
 background, border, border-radius, box-shadow and spacing of the cards inside,
@@ -39,7 +39,7 @@ Claude's responsibility. Work like an owner:
 ## Layout
 
 - `src/stack-in-card.ts` – the card. `src/editor.ts` – visual editor,
-  loaded eagerly into the same bundle. `src/card-helpers.ts` – loads
+  imported by the card into the same bundle. `src/card-helpers.ts` – loads
   `window.loadCardHelpers()` once. `src/types.ts` – config and the few Home
   Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
 - No translation files: the editor's three labels come from Home
@@ -108,8 +108,9 @@ Use these instead of doing the steps by hand; they hold the details.
   paint. Don't rely on the DOM walk alone: `ha-card` has
   `transition: all 0.3s`, so styles set after render show the borders
   fading out on every page load.
-- As a fallback for cards with their own styles, styling also walks the DOM after each render (`_styleTree`) and again after
-  500 ms for cards that render late: in a shadow root it merges the
+- As a fallback for cards with their own styles, the card also walks the
+  DOM when a stack is shown (`_styleTree`), and again after 500 ms for
+  cards that render late: in a shadow root it merges the
   `ha-card`, or, in stacks, goes through the `#root` (or `#card`) container
   and its children; in the light DOM (`hui-card`) it goes through the
   children. Inline styles: `background`, `border`, `border-radius`,
@@ -147,6 +148,11 @@ Use these instead of doing the steps by hand; they hold the details.
   The merge styles are set inline without `!important` on purpose, so
   card-mod with `!important` on a card inside can still override them;
   that's an accepted escape hatch.
+- No Lit or other runtime dependencies: the card and editor are plain
+  custom elements (2026-11-26). They only render one `ha-card` and one
+  `ha-form`; Lit was ~70% of the bundle (24 KB → 6 KB). simple-weather-card
+  uses Lit because it renders far more. Add a dependency only when it saves
+  more than it costs.
 - No translation files of our own: the editor uses Home Assistant's
   translations, which cover every language. Add own translations only if
   the editor gets text HA has no string for.

@@ -1,6 +1,3 @@
-import { LitElement, PropertyValues, html, nothing } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-
 import { loadCardHelpers } from "./card-helpers";
 import {
   HomeAssistant,
@@ -69,42 +66,80 @@ const buildSchemas = (t: Translate) => ({
 
 type Schemas = ReturnType<typeof buildSchemas>;
 
-@customElement("stack-in-card-editor")
-export class StackInCardEditor extends LitElement {
-  @property({ attribute: false }) hass?: HomeAssistant;
+// The parts of Home Assistant's ha-form the editor sets
+interface HaForm extends HTMLElement {
+  hass?: HomeAssistant;
+  data?: unknown;
+  schema?: unknown;
+  computeLabel?: (schema: { name: string }) => string;
+}
+
+export class StackInCardEditor extends HTMLElement {
+  private _hass?: HomeAssistant;
   // The dashboard's config, which the card picker of the stack editor uses
-  @property({ attribute: false }) lovelace?: unknown;
-  @state() private _config?: StackInCardConfig;
-  @state() private _stackEditor?: StackEditor;
+  private _lovelace?: unknown;
+  private _config?: StackInCardConfig;
+  private _form?: HaForm;
+  private _stackEditor?: StackEditor;
+  private _loading = false;
 
   // Built again only when Home Assistant's translations change (a new
-  // localize function). New schema objects on every render would make
-  // ha-form rebuild its fields.
+  // localize function). New schema objects would make ha-form rebuild its
+  // fields.
   private _schemaCache?: { localize: unknown; schemas: Schemas };
+
+  set hass(hass: HomeAssistant) {
+    this._hass = hass;
+    this._update();
+  }
+
+  set lovelace(lovelace: unknown) {
+    this._lovelace = lovelace;
+    this._update();
+  }
 
   setConfig(config: StackInCardConfig): void {
     this._config = config;
+    this._stackEditor?.setConfig(this._stackConfig(config));
+    this._update();
   }
 
   connectedCallback(): void {
-    super.connectedCallback();
-    if (!this._stackEditor) {
-      loadStackEditor().then((editor) => {
-        editor.addEventListener("config-changed", this._cardsChanged);
-        this._stackEditor = editor;
-      });
-    }
+    if (this._loading) return;
+    this._loading = true;
+    loadStackEditor().then((editor) => {
+      editor.addEventListener("config-changed", this._cardsChanged);
+      this._stackEditor = editor;
+      if (this._config) editor.setConfig(this._stackConfig(this._config));
+      this._update();
+    });
   }
 
-  protected updated(changed: PropertyValues): void {
-    super.updated(changed);
-    const editor = this._stackEditor;
-    if (!editor || !this._config) return;
-    editor.hass = this.hass;
-    editor.lovelace = this.lovelace;
-    if (changed.has("_config") || changed.has("_stackEditor")) {
-      editor.setConfig(this._stackConfig(this._config));
+  // Shows the mode form, and the stack editor once it has loaded
+  private _update(): void {
+    if (!this._config || !this._hass) return;
+    const shadow = this.shadowRoot ?? this.attachShadow({ mode: "open" });
+
+    if (!this._form) {
+      this._form = document.createElement("ha-form") as HaForm;
+      this._form.computeLabel = this._computeLabel;
+      this._form.addEventListener("value-changed", (ev) =>
+        this._modeChanged(ev as CustomEvent),
+      );
+      shadow.append(this._form);
     }
+    this._form.hass = this._hass;
+    this._form.schema = this._schemas.mode;
+    // A new data object makes ha-form render again, so only on a change
+    const mode = this._config.mode ?? "vertical";
+    const data = this._form.data as { mode?: string } | undefined;
+    if (data?.mode !== mode) this._form.data = { mode };
+
+    const editor = this._stackEditor;
+    if (!editor) return;
+    editor.hass = this._hass;
+    editor.lovelace = this._lovelace;
+    if (!editor.parentNode) shadow.append(editor);
   }
 
   // Home Assistant's stack editor rejects options it doesn't know, so it
@@ -140,37 +175,25 @@ export class StackInCardEditor extends LitElement {
   private _fire(config: StackInCardConfig): void {
     // `keep` from the original card does nothing here, so it's removed
     delete (config as { keep?: unknown }).keep;
-    this._config = config;
+    this.setConfig(config);
     fireEvent(this, "config-changed", { config });
   }
 
   private _t = (name: string): string => {
     const [key, english] = LABELS[name];
-    return this.hass?.localize?.(key) || english;
+    return this._hass?.localize?.(key) || english;
   };
 
   private _computeLabel = (schema: { name: string }): string =>
     this._t(schema.name);
 
   private get _schemas(): Schemas {
-    const localize = this.hass?.localize;
+    const localize = this._hass?.localize;
     if (!this._schemaCache || this._schemaCache.localize !== localize) {
       this._schemaCache = { localize, schemas: buildSchemas(this._t) };
     }
     return this._schemaCache.schemas;
   }
-
-  protected render() {
-    if (!this._config || !this.hass) return nothing;
-    return html`
-      <ha-form
-        .hass=${this.hass}
-        .data=${{ mode: this._config.mode ?? "vertical" }}
-        .schema=${this._schemas.mode}
-        .computeLabel=${this._computeLabel}
-        @value-changed=${this._modeChanged}
-      ></ha-form>
-      ${this._stackEditor ?? nothing}
-    `;
-  }
 }
+
+customElements.define("stack-in-card-editor", StackInCardEditor);

@@ -1,7 +1,5 @@
-import { LitElement, PropertyValues, css, html, nothing } from "lit";
-import { customElement, state } from "lit/decorators.js";
-
 import { loadCardHelpers } from "./card-helpers";
+import "./editor";
 import {
   HomeAssistant,
   LovelaceCard,
@@ -29,10 +27,31 @@ const STUB_ICONS = ["mdi:lightbulb", "mdi:power-socket-eu", "mdi:fan"];
 // delay, for cards that render late (custom cards that are still loading)
 const RESTYLE_DELAY = 500;
 
-// Lit elements, like Home Assistant's cards, render asynchronously
+// Home Assistant's cards are Lit elements, which render asynchronously
 const afterUpdate = async (element: Element): Promise<void> => {
-  await (element as Partial<LitElement>).updateComplete;
+  await (element as { updateComplete?: Promise<unknown> }).updateComplete;
 };
+
+// Home Assistant's cards and stacks read these variables, so they are
+// merged from their first paint. Styles set after they have rendered (see
+// _styleTree) show their borders first, fading out with ha-card's 0.3s
+// transition. The variables only reach the cards inside, not this card's
+// own ha-card.
+const STYLES = `
+  ha-card {
+    overflow: hidden;
+  }
+  .stack {
+    --ha-card-background: transparent;
+    --ha-card-border-width: 0px;
+    --ha-card-border-radius: 0px;
+    --ha-card-box-shadow: none;
+    --stack-card-gap: 0px;
+    --vertical-stack-card-gap: 0px;
+    --horizontal-stack-card-gap: 0px;
+    --grid-card-gap: 0px;
+  }
+`;
 
 const mergeHaCard = (card: HTMLElement): void => {
   card.style.background = "transparent";
@@ -50,40 +69,16 @@ const computeCardSize = (card: LovelaceCard): number | Promise<number> => {
     .then(() => computeCardSize(card));
 };
 
-@customElement("stack-in-card")
-export class StackInCard extends LitElement {
-  @state() private _config?: StackInCardConfig;
-  @state() private _card?: LovelaceCard;
-
+export class StackInCard extends HTMLElement {
+  private _config?: StackInCardConfig;
+  private _card?: LovelaceCard;
   private _hass?: HomeAssistant;
   private _preview = false;
   private _cardPromise?: Promise<LovelaceCard>;
   private _restyleTimer?: number;
 
-  // Home Assistant's cards and stacks read these variables, so they are
-  // merged from their first paint. Setting the styles after they have
-  // rendered (below) shows their borders first, fading out with ha-card's
-  // 0.3s transition. The variables only reach the cards inside, not this
-  // card's own ha-card.
-  static styles = css`
-    ha-card {
-      overflow: hidden;
-    }
-    .stack {
-      --ha-card-background: transparent;
-      --ha-card-border-width: 0px;
-      --ha-card-border-radius: 0px;
-      --ha-card-box-shadow: none;
-      --stack-card-gap: 0px;
-      --vertical-stack-card-gap: 0px;
-      --horizontal-stack-card-gap: 0px;
-      --grid-card-gap: 0px;
-    }
-  `;
-
   // HA's stack editor for the cards, with a field for the mode
-  static async getConfigElement(): Promise<HTMLElement> {
-    await import(/* webpackMode: "eager" */ "./editor");
+  static getConfigElement(): HTMLElement {
     return document.createElement("stack-in-card-editor");
   }
 
@@ -127,18 +122,10 @@ export class StackInCard extends LitElement {
     if (this._card) this._card.hass = hass;
   }
 
-  get hass(): HomeAssistant | undefined {
-    return this._hass;
-  }
-
   // Set by the card editor's preview; the stack shows "Empty card" then
   set preview(preview: boolean) {
     this._preview = preview;
     if (this._card) this._card.preview = preview;
-  }
-
-  get preview(): boolean {
-    return this._preview;
   }
 
   setConfig(config: StackInCardConfig): void {
@@ -159,39 +146,17 @@ export class StackInCard extends LitElement {
   }
 
   disconnectedCallback(): void {
-    super.disconnectedCallback();
     clearTimeout(this._restyleTimer);
   }
 
-  protected render() {
-    if (!this._config || !this._card) return nothing;
-    return html`
-      <ha-card header=${this._config.title ?? nothing}>
-        <div class="stack">${this._card}</div>
-      </ha-card>
-    `;
-  }
-
-  protected updated(changed: PropertyValues): void {
-    super.updated(changed);
-    if (this._card) this._styleStack(this._card);
-  }
-
   private async _createStack(config: LovelaceCardConfig): Promise<void> {
-    const promise = this._createCard(config);
+    const promise = loadCardHelpers().then((helpers) =>
+      helpers.createCardElement(config),
+    );
     this._cardPromise = promise;
     const card = await promise;
     // setConfig ran again while this stack was created
     if (promise !== this._cardPromise) return;
-    // hass and preview may have been set while the card helpers loaded
-    if (this._hass) card.hass = this._hass;
-    card.preview = this._preview;
-    this._card = card;
-  }
-
-  private async _createCard(config: LovelaceCardConfig): Promise<LovelaceCard> {
-    const helpers = await loadCardHelpers();
-    const card = helpers.createCardElement(config);
     card.addEventListener(
       "ll-rebuild",
       (ev) => {
@@ -200,7 +165,24 @@ export class StackInCard extends LitElement {
       },
       { once: true },
     );
-    return card;
+    // hass and preview may have been set while the card helpers loaded
+    if (this._hass) card.hass = this._hass;
+    card.preview = this._preview;
+    this._card = card;
+    this._render(card);
+  }
+
+  private _render(card: LovelaceCard): void {
+    const shadow = this.shadowRoot ?? this.attachShadow({ mode: "open" });
+    if (!shadow.firstChild) {
+      shadow.innerHTML = `<style>${STYLES}</style><ha-card><div class="stack"></div></ha-card>`;
+    }
+    const haCard = shadow.querySelector("ha-card")!;
+    const title = this._config?.title;
+    if (title) haCard.setAttribute("header", title);
+    else haCard.removeAttribute("header");
+    haCard.firstElementChild!.replaceChildren(card);
+    this._styleStack(card);
   }
 
   private _styleStack(card: LovelaceCard): void {
@@ -214,7 +196,7 @@ export class StackInCard extends LitElement {
   // Walks down through stacks and other cards that hold cards, and merges
   // every `ha-card` it finds into this one: no background, border, rounded
   // corners, shadow or space between them. That's the point of the card, so
-  // none of it can be turned off. The CSS variables in `styles` already do
+  // none of it can be turned off. The CSS variables in `STYLES` already do
   // this for cards that use them; this catches the cards that set their own
   // styles, like custom cards.
   private async _styleTree(element: Element): Promise<void> {
@@ -250,6 +232,8 @@ export class StackInCard extends LitElement {
     }
   }
 }
+
+customElements.define("stack-in-card", StackInCard);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
