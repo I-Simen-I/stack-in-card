@@ -1,20 +1,51 @@
-name: "Build"
+name: Build
 
 on:
   push:
     branches:
-      - master
+      - "**"
   pull_request:
-    branches:
-      - master
 
 jobs:
   build:
-    name: Test build
+    # Pull requests from this repo are already built by the push event
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v7
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Lint
+        run: yarn lint
+
+      # ESLint formats the code; this covers markdown, JSON and YAML too
+      - name: Check formatting
+        run: yarn prettier --check .
+
       - name: Build
-        run: |
-          yarn install
-          npm run build
+        run: yarn build
+
+      - name: Smoke test
+        run: yarn test
+
+      - name: Upload build
+        uses: actions/upload-artifact@v7
+        with:
+          name: stack-in-card
+          path: dist/stack-in-card.js
+          if-no-files-found: error

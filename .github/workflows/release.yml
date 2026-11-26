@@ -1,30 +1,99 @@
 name: Release
 
+# Run from the Actions tab ("Run workflow"). Creates a draft release with
+# the built card and generated release notes. Review it and press Publish;
+# the tag is created then, and Marketplace (HACS) users get the update.
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: minor
+      beta:
+        description: Beta (only for users with beta versions enabled in the Marketplace)
+        type: boolean
+        default: false
+
+concurrency: release
 
 jobs:
   release:
-    name: Prepare release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v1
-
-      # Build
-      - name: Build the file
+      - name: Only release from master
+        if: github.ref != 'refs/heads/master'
         run: |
-          cd /home/runner/work/stack-in-card/stack-in-card
-          yarn install
-          npm run build
+          echo "::error::Releases can only be made from master"
+          exit 1
 
-      # Upload build file to the releas as an asset.
-      - name: Upload zip to release
-        uses: svenstaro/upload-release-action@v1-release
-
+      - uses: actions/checkout@v7
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: /home/runner/work/stack-in-card/stack-in-card/dist/stack-in-card.js
-          asset_name: stack-in-card.js
-          tag: ${{ github.ref }}
-          overwrite: true
+          # Tags are needed to work out the next version
+          fetch-depth: 0
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Determine version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+          BETA: ${{ inputs.beta }}
+        run: |
+          node .github/scripts/next-version.mjs "$BUMP" "$BETA" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Build
+        env:
+          CARD_VERSION: ${{ steps.version.outputs.tag }}
+        run: yarn build
+
+      - name: Smoke test
+        run: yarn test
+
+      # Generated here instead of by the release action, to control which
+      # tag the notes start from: the last stable for a stable release, so
+      # betas in between don't hide changes
+      - name: Generate release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+        run: |
+          args=(-f tag_name="$TAG" -f target_commitish="$GITHUB_SHA")
+          if [ -n "$PREVIOUS" ]; then
+            args+=(-f previous_tag_name="$PREVIOUS")
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" "${args[@]}" \
+            --jq .body > release-notes.md
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ steps.version.outputs.tag }}
+          body_path: release-notes.md
+          draft: true
+          prerelease: ${{ inputs.beta }}
+          files: dist/stack-in-card.js

@@ -1,0 +1,129 @@
+# Test dashboard for stack-in-card. Each view puts the card next to Home
+# Assistant's own stack with the same cards, to compare.
+title: Stack in card
+views:
+  # For images/main.png in the README, see dev/README.md
+  - title: Compare
+    path: compare
+    cards:
+      - type: custom:stack-in-card
+        title: Stack In Card
+        cards: &compare
+          - type: weather-forecast
+            entity: weather.demo_weather_south
+            forecast_type: daily
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: light.bed_light
+              - type: button
+                entity: light.ceiling_lights
+              - type: button
+                entity: light.kitchen_lights
+              - type: button
+                entity: light.office_rgbw_lights
+          - type: alarm-panel
+            entity: alarm_control_panel.security
+            name: Security
+      - type: vertical-stack
+        title: Vertical stack
+        cards: *compare
+
+  # For images/demo_1.png in the README, see dev/README.md
+  - title: Gallery
+    path: gallery
+    cards:
+      - type: custom:stack-in-card
+        cards:
+          - type: weather-forecast
+            entity: weather.demo_weather_south
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: light.bed_light
+              - type: button
+                entity: light.ceiling_lights
+              - type: button
+                entity: light.kitchen_lights
+      - type: custom:stack-in-card
+        title: Living room
+        cards:
+          - type: entities
+            entities:
+              - light.ceiling_lights
+              - switch.decorative_lights
+          - type: glance
+            entities:
+              - sensor.indoor_temperature
+              - sensor.indoor_humidity
+              - sensor.carbon_dioxide
+          - type: thermostat
+            entity: climate.ecobee
+
+  # Its first four cards are images/demo_2.png and demo_3.png
+  - title: Basics
+    path: basics
+    cards:
+      - type: custom:stack-in-card
+        title: Vertical (default)
+        cards: &cards
+          - type: entities
+            entities:
+              - light.bed_light
+              - light.ceiling_lights
+          - type: glance
+            entities:
+              - sensor.outside_temperature
+              - sensor.outside_humidity
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: light.kitchen_lights
+              - type: button
+                entity: switch.decorative_lights
+      - type: vertical-stack
+        title: Home Assistant's vertical stack
+        cards: *cards
+      - type: custom:stack-in-card
+        title: Horizontal
+        mode: horizontal
+        cards: &buttons
+          - type: button
+            entity: light.bed_light
+          - type: button
+            entity: light.ceiling_lights
+          - type: button
+            entity: light.kitchen_lights
+      - type: horizontal-stack
+        cards: *buttons
+      - type: custom:stack-in-card
+        cards: *buttons
+
+  - title: Nested
+    path: nested
+    cards:
+      - type: custom:stack-in-card
+        title: Nested stacks
+        cards:
+          - type: horizontal-stack
+            cards: *buttons
+          - type: vertical-stack
+            cards:
+              - type: entities
+                entities:
+                  - light.bed_light
+              - type: entities
+                entities:
+                  - light.ceiling_lights
+      - type: custom:stack-in-card
+        title: Nested stack-in-card
+        cards:
+          - type: entities
+            entities:
+              - light.bed_light
+          - type: custom:stack-in-card
+            mode: horizontal
+            cards: *buttons
+      - type: custom:stack-in-card
+        title: Empty (shows nothing outside the editor)
+        cards: []
