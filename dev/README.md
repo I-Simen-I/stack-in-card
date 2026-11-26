@@ -30,11 +30,20 @@ yarn ha:down        # stop the container
 
 - `config/configuration.yaml`: demo integration, card loaded via
   `frontend.extra_module_url`, and the dashboard below
-- `config/dashboards/stack.yaml`: test cards (both modes, nested stacks,
-  a nested stack-in-card)
+- `config/dashboards/stack.yaml`: test cards (the README gallery, both
+  modes next to Home Assistant's own stacks, nested stacks)
 
 Everything else Home Assistant writes to `config/` is ignored by git. Delete
 it to start over from a fresh install.
+
+## README images
+
+The **Gallery** view shows the card with the cards people stack most, for
+`images/gallery.png`. Set your profile language to English, collapse the
+sidebar, and take the cards with Cmd+Shift+4 (drag around them).
+
+For `images/editor.png`, edit the first card in the Gallery view and take
+the editor dialog.
 
 ## Releasing
 

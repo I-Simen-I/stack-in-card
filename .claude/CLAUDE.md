@@ -10,7 +10,8 @@ notes are in English.
 
 Simen's other fork, simple-weather-card (cloned in `../simple-weather-card`),
 is the reference for tooling, tests, CI, docs and workflow. Keep the two in
-step: copy its setup instead of inventing a new one.
+step: copy its setup instead of inventing a new one. Deviations on purpose
+are listed under Decisions.
 
 Personal, machine-specific notes go in `.claude/rules/personal.md` (not
 committed; every file in `.claude/rules/` is loaded automatically).
@@ -45,15 +46,18 @@ Claude's responsibility. Work like an owner:
 - No translation files: the editor's three labels come from Home
   Assistant's own translations (`hass.localize`), see `LABELS` in
   `src/editor.ts`.
-- `test/` – Node test runner. `card.test.mjs` and `editor.test.mjs` load the **built** bundle in
-  happy-dom, with fake `hui-*-stack-card`, `hui-card` and `test-card`
-  elements and a fake `hui-stack-card-editor` from `helpers.mjs` shaped
-  like Home Assistant's, so `yarn build`
-  before `yarn test`. `next-version.test.mjs` tests the release script.
+- `test/` – Node test runner. `card.test.mjs` and `editor.test.mjs` load
+  the **built** bundle in happy-dom, with fake `hui-*-stack-card`,
+  `hui-card`, `test-card` and `hui-stack-card-editor` elements from
+  `helpers.mjs` shaped like Home Assistant's, so `yarn build` before
+  `yarn test`. `next-version.test.mjs` tests the release script.
 - `.github/workflows/` – build (typecheck, lint, formatting, build, test,
   artifact), release (manual button), labeler, HACS validation.
 - `dev/` – local Home Assistant in Docker for manual testing.
-- `docs/Example.png` – the README screenshot (from 2020).
+- `images/gallery.png` – the README image, still upstream's screenshot from
+  2020 until Simen takes a new one from the Gallery view. `images/editor.png`
+  (as in simple-weather-card) doesn't exist yet; add it to the README's
+  Visual editor section when it does.
 
 ## Commands
 
@@ -118,6 +122,11 @@ Use these instead of doing the steps by hand; they hold the details.
   roots.
 - A nested `stack-in-card` gets its `ha-card` merged like any card, and
   merges its own cards.
+- Cards inside are created and rendered by Home Assistant as usual, with
+  their own Lit if they have it. Cards that style their own `ha-card`
+  without HA's variables (simple-weather-card's `backdrop`, a colored
+  button-card) are only merged by the DOM walk, just after they render,
+  and lose their own background color: that's by design.
 - `ll-rebuild` from the stack recreates it.
 - Visual editor: a `mode` form on top, then Home Assistant's own stack
   editor (`hui-stack-card-editor`, from
@@ -189,9 +198,9 @@ frontend repo (`home-assistant/frontend`), especially
   container `stack-in-card-ha`; both forks have `dev/docker-compose.yml`, so
   without the `name:` the projects clash and one replaces the other's
   container.
-- Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): views for
-  the basics (next to HA's own stacks with the same cards) and nested
-  stacks.
+- Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): Gallery
+  (the README image, see `dev/README.md`), Basics (both modes next to HA's
+  own stacks with the same cards) and Nested.
 - `dev-loader.js` imports the card with `?t=<now>`, because HA serves
   `/local/` with a 31 day cache. Other files in `www/` need a hard refresh.
 - Changes to `configuration.yaml` need `docker restart stack-in-card-ha`.

@@ -6,16 +6,18 @@
 
 Group several cards into one card on your [Home Assistant](https://www.home-assistant.io/) dashboards, without the borders, shadows and gaps between them.
 
-![Stack In Card with an entities card, a glance card and two buttons](docs/Example.png)
+![Stack In Card with different cards merged into one](/images/gallery.png)
 
 > A fork of [stack-in-card](https://github.com/custom-cards/stack-in-card) by [@RomRider](https://github.com/RomRider), kept up to date with current Home Assistant releases.
 
 ## Features
 
 - **One card from many**: stack any cards vertically or horizontally, and they look like one card
-- **Nested stacks**: horizontal and vertical stacks inside the card are merged too
-- **Visual editor** with Home Assistant's own card tabs
+- **Nested stacks**: horizontal and vertical stacks inside the card, and other stack-in-cards, are merged too
+- **No flicker**: Home Assistant's cards are merged before they're shown, so their borders never flash on page load
 - **Nothing to tune**: backgrounds, borders, rounded corners, shadows and gaps of the cards inside are always removed
+- **Visual editor** with Home Assistant's own card tabs, in your Home Assistant language
+- **Small**: about 6 KB, without dependencies
 - A drop-in replacement for [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card) and `horizontal-stack-in-card`
 
 ## Installation
@@ -49,37 +51,40 @@ From Home Assistant 2026.11, HACS is built in as the **Marketplace** (Settings â
 
 ## Configuration
 
-Add **Stack In Card** from the card picker; it starts with a weather card above three buttons side by side.
-
 ### Visual editor
 
-The editor has the layout (vertical or horizontal stack), the title and the cards, with the same tabs as Home Assistant's own stacks to add, move, copy and delete cards and edit each one. It's in your Home Assistant language.
+Add the card from the card picker; it starts with a weather card above three buttons side by side. In the editor, choose the layout (vertical or horizontal stack), set a title, and add, move, copy and edit the cards with the same tabs as Home Assistant's own stacks.
 
 ### YAML
 
-Add the cards to stack under `cards`, as you would in a vertical stack.
+Add the cards to stack under `cards`, as you would in a vertical stack:
 
 ```yaml
 type: custom:stack-in-card
-title: Living room
 cards:
+  - type: weather-forecast
+    entity: weather.home
   - type: entities
     entities:
-      - light.ceiling_lights
-  - type: glance
-    entities:
-      - sensor.outside_temperature
-      - sensor.outside_humidity
+      - light.living_room
 ```
 
 #### Card options
 
-| Name    | Type   | Default    | Description                |
-| ------- | ------ | ---------- | -------------------------- |
-| `type`  | string | _required_ | `custom:stack-in-card`     |
-| `cards` | list   | _required_ | The cards to stack         |
-| `mode`  | string | `vertical` | `vertical` or `horizontal` |
-| `title` | string |            | Title above the cards      |
+| Name    | Type   | Default      | Since  | Description                |
+| ------- | ------ | ------------ | ------ | -------------------------- |
+| `type`  | string | **required** | v0.0.1 | `custom:stack-in-card`     |
+| `cards` | list   | **required** | v0.0.1 | The cards to stack         |
+| `mode`  | string | `vertical`   | v0.0.1 | `vertical` or `horizontal` |
+| `title` | string |              | v0.0.1 | Title above the cards      |
+
+The cards inside always lose their background, border, rounded corners, shadow and the space between them; there are no options for it. To keep the look of one card anyway, override it on that card with [card-mod](https://github.com/thomasloven/lovelace-card-mod) and `!important`:
+
+```yaml
+card_mod:
+  style: |
+    ha-card { background: var(--primary-color) !important; }
+```
 
 ## Examples
 
@@ -97,28 +102,34 @@ cards:
 
 ### Nested stacks
 
-Stacks inside the card are merged too:
+Stacks inside the card are merged too, here a row of buttons below a weather card:
 
 ```yaml
 type: custom:stack-in-card
-title: My Stack In Card
+title: Living room
 cards:
+  - type: weather-forecast
+    entity: weather.home
   - type: horizontal-stack
     cards:
       - type: button
-        entity: sun.sun
+        entity: light.ceiling_lights
       - type: button
-        entity: sun.sun
-  - type: entities
-    entities:
-      - sun.sun
+        entity: light.floor_lamp
+      - type: button
+        entity: switch.tv
 ```
+
+## Translations
+
+The visual editor uses Home Assistant's own translations, so it follows your Home Assistant language without translations of its own.
 
 ## Troubleshooting
 
 - **"Custom element doesn't exist: stack-in-card"**: the card isn't loaded. Check that it's installed in the Marketplace (or HACS), or added as a resource if you installed it manually, then reload your browser.
 - **Changes don't show after an update**: your browser is using a cached copy. Reload without cache (Ctrl+Shift+R or Cmd+Shift+R), or clear the cache in the Home Assistant app.
-- **A card still has a background or border**: the card is styled once it has rendered, and again after half a second. Custom cards that take longer to load can be missed; reload the page.
+- **A card still has a background or border**: cards that style themselves, instead of using Home Assistant's card styles, are merged just after they're shown, and again after half a second. A custom card that loads slower than that can be missed; reload the page.
+- **A card loses its own background color** (like a colored button-card or a weather backdrop): that's by design, the cards inside always merge. Override it with card-mod and `!important`, see [Card options](#card-options).
 
 Still stuck? [Open an issue](https://github.com/I-Simen-I/stack-in-card/issues).
 

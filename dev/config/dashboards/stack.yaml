@@ -2,6 +2,38 @@
 # Assistant's own stack with the same cards, to compare.
 title: Stack in card
 views:
+  # For images/gallery.png in the README, see dev/README.md
+  - title: Gallery
+    path: gallery
+    cards:
+      - type: custom:stack-in-card
+        cards:
+          - type: weather-forecast
+            entity: weather.demo_weather_south
+            show_forecast: true
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: light.bed_light
+              - type: button
+                entity: light.ceiling_lights
+              - type: button
+                entity: light.kitchen_lights
+      - type: custom:stack-in-card
+        title: Living room
+        cards:
+          - type: entities
+            entities:
+              - light.ceiling_lights
+              - switch.decorative_lights
+          - type: glance
+            entities:
+              - sensor.outside_temperature
+              - sensor.outside_humidity
+              - sensor.carbon_dioxide
+          - type: thermostat
+            entity: climate.ecobee
+
   - title: Basics
     path: basics
     cards:
