@@ -56,8 +56,8 @@ code itself is Claude's responsibility. Work like an owner:
 - `dev/` – local Home Assistant in Docker for manual testing.
 - `images/` – README images, taken from the test dashboard (see
   `dev/README.md`): `main.png` (top: the card next to HA's vertical
-  stack, Compare view) and `demo_1.png`–`demo_3.png` (one per example,
-  Gallery and Basics views). The README's examples show the same cards as the views;
+  stack, Compare view) and `demo_1.png`–`demo_5.png` (the examples,
+  Gallery, Basics and Overflow views). The README's examples show the same cards as the views;
   change both together. `editor.png` (the editor, from the Compare view) is in the README's Visual
   editor section, as in simple-weather-card.
 
@@ -118,13 +118,27 @@ Use these instead of doing the steps by hand; they hold the details.
   `transition: all 0.3s`, so styles set after render show the borders
   fading out on every page load.
 - As a fallback for cards with their own styles, the card also walks the
-  DOM when a stack is shown (`_styleTree`), and again after 500 ms for
-  cards that render late: in a shadow root it merges the
+  DOM when a stack is shown and whenever the card is put on the page
+  (`_styleTree`; dashboards render cards off the page and then move them,
+  which cancels the timer), and again after 500 ms for cards that render
+  late: in a shadow root it merges the
   `ha-card`, or, in stacks, goes through the `#root` (or `#card`) container
   and its children; in the light DOM (`hui-card`) it goes through the
   children. Inline styles: `background`, `border`, `border-radius`,
   `box-shadow` on every `ha-card`, `margin` on the children, `gap` on stack
   roots.
+- The card's own `ha-card` doesn't clip (no `overflow: hidden`, upstream
+  #5/#40), so menus of cards inside, like mini-media-player's own
+  `position: absolute` menu, can reach outside it. Instead, the walk gives
+  each card the corners of the stack it touches as an inline
+  `--ha-card-border-radius` ("tl tr br bl", `childCorners`): first/last
+  card of a vertical stack get the top/bottom corners, of a horizontal one
+  the left/right corners, nested stacks pass them on, and cards in grids or
+  unknown containers get none unless they're alone. The radii are read from
+  the card's own rendered `ha-card` (`_corners`), without the top ones under
+  a title, so they follow the theme and a nested stack-in-card passes on
+  the corners it got. Merged `ha-card`s use
+  `border-radius: var(--ha-card-border-radius, 0px)`.
 - A nested `stack-in-card` gets its `ha-card` merged like any card, and
   merges its own cards.
 - Cards inside are created and rendered by Home Assistant as usual, with
@@ -206,6 +220,11 @@ frontend repo (`home-assistant/frontend`), especially
 - Dashboard "Stack in card" (`dev/config/dashboards/stack.yaml`): Compare
   and Gallery (the README images, see `dev/README.md`), Basics (both modes next to HA's
   own stacks with the same cards) and Nested.
+- Overflow view: a picture, a history graph, a `select` row and
+  `dev-popup-card` (an always open `position: absolute` menu, like custom
+  cards draw) next to HA's vertical stack, and pictures at the top (no
+  title) and bottom of a card: for
+  clipped menus and the rounded corners.
 - The demo has only outdoor sensors; `configuration.yaml` adds template
   sensors `sensor.indoor_temperature` and `sensor.indoor_humidity` (fixed
   values) for the living room card.

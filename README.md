@@ -16,8 +16,9 @@ Group several cards into one card on your [Home Assistant](https://www.home-assi
 - **Nested stacks**: horizontal and vertical stacks inside the card, and other stack-in-cards, are merged too
 - **No flicker**: Home Assistant's cards are merged before they're shown, so their borders never flash on page load
 - **Nothing to tune**: backgrounds, borders, rounded corners, shadows and gaps of the cards inside are always removed
+- **Nothing cut off**: menus of the cards inside can reach outside the card, and pictures in its corners follow its rounded corners
 - **Visual editor** with Home Assistant's own card tabs, in your Home Assistant language
-- **Small**: about 6 KB, without dependencies
+- **Small**: about 7 KB, without dependencies
 - A drop-in replacement for [vertical-stack-in-card](https://github.com/ofekashery/vertical-stack-in-card) and `horizontal-stack-in-card`
 
 ## Installation
@@ -171,6 +172,26 @@ cards:
     entity: light.ceiling_lights
   - type: button
     entity: light.kitchen_lights
+```
+
+### Menus and pictures
+
+The card doesn't cut off what's inside it, so menus of the cards inside, like the open menu of a media player card, can reach outside it, as in Home Assistant's own stack:
+
+![A card with an open menu reaching below Stack In Card, next to Home Assistant's vertical stack](/images/demo_4.png)
+
+Pictures in the corners of the card get its rounded corners, at the top without a title and at the bottom:
+
+![Pictures at the top and the bottom of Stack In Card, following its rounded corners](/images/demo_5.png)
+
+```yaml
+type: custom:stack-in-card
+cards:
+  - type: picture
+    image: /local/garden.jpg
+  - type: entities
+    entities:
+      - light.garden
 ```
 
 ## Translations

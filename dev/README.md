@@ -31,7 +31,12 @@ yarn ha:down        # stop the container
 - `config/configuration.yaml`: demo integration, card loaded via
   `frontend.extra_module_url`, and the dashboard below
 - `config/dashboards/stack.yaml`: test cards (the README images, both
-  modes next to Home Assistant's own stacks, nested stacks)
+  modes next to Home Assistant's own stacks, nested stacks, content
+  reaching outside the card)
+- `config/www/dev-popup-card.js`: a card with an always open menu, drawn
+  like custom cards draw theirs, for the Overflow view
+- `config/www/dev-picture.svg`: a colorful picture for the Overflow view,
+  to see whether pictures in the corners follow the rounded corners
 
 Everything else Home Assistant writes to `config/` is ignored by git. Delete
 it to start over from a fresh install.
@@ -49,6 +54,10 @@ cards with Cmd+Shift+4 (drag around them).
   vertical card next to Home Assistant's vertical stack.
 - `images/demo_3.png`: the horizontal card and Home Assistant's horizontal
   stack below it, in the **Basics** view.
+- `images/demo_4.png`: the first two cards in the **Overflow** view, the
+  open menu reaching outside the card.
+- `images/demo_5.png`: the two cards with pictures in the **Overflow**
+  view, the pictures following the rounded corners.
 
 The README's examples show the same cards as these views.
 
