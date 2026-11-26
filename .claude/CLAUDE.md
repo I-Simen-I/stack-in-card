@@ -82,8 +82,8 @@ tables; CI checks every file with `yarn prettier --check .`.
 - Releases: Actions → Release → Run workflow (patch/minor/major, beta). It
   creates a draft with generated notes; a summary goes above them before
   publishing. Tags are `vX.Y.Z`; upstream's tags (`0.2.0`, no `v`) aren't in
-  the fork, so tag the upstream release commit `6d8401d` as `v0.2.0` before
-  the first release, or the release script starts at `v0.1.0`.
+  the fork. The first release is v1.0.0: with no tags, a **major** bump
+  gives `v1.0.0` (patch or minor would give `v0.0.1`/`v0.1.0`).
 - Verify claims instead of guessing (Home Assistant's frontend source, git
   history, the GitHub API). Before saying something works, test it, and say
   clearly what wasn't tested.
