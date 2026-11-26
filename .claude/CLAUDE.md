@@ -88,6 +88,9 @@ tables; CI checks every file with `yarn prettier --check .`.
   history, the GitHub API). Before saying something works, test it, and say
   clearly what wasn't tested.
 - New behavior gets smoke tests that fail against `master`.
+- The release workflow builds with `CARD_VERSION=<tag>` before the smoke
+  tests, so tests must pass with a tag too (`CARD_VERSION=v1.0.0 yarn build
+&& yarn test`), not only with the local `dev`.
 - happy-dom resolves `customElements.whenDefined()` with `undefined`; look the
   class up with `customElements.get()`. It normalizes inline styles
   (`borderRadius = "0"` reads back as `"0px"`).
