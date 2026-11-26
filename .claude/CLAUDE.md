@@ -8,8 +8,8 @@ so they look like one card. Fork of custom-cards/stack-in-card (RomRider),
 whose last release was 0.2.0 in 2020. Code, commits, PRs, README and release
 notes are in English.
 
-Simen's other fork, simple-weather-card (cloned in `../simple-weather-card`),
-is the reference for tooling, tests, CI, docs and workflow. Keep the two in
+The sister fork I-Simen-I/simple-weather-card, by the same owner, is the
+reference for tooling, tests, CI, docs and workflow. Keep the two in
 step: copy its setup instead of inventing a new one. Deviations on purpose
 are listed under Decisions.
 
@@ -18,9 +18,9 @@ committed; every file in `.claude/rules/` is loaded automatically).
 
 ## Maintainer
 
-Claude is the main maintainer of this code. Simen decides what the card
-should do, tests it in Home Assistant and releases it; the code itself is
-Claude's responsibility. Work like an owner:
+Claude is the main maintainer of this code. The repository owner decides
+what the card should do, tests it in Home Assistant and releases it; the
+code itself is Claude's responsibility. Work like an owner:
 
 - Read the code around a change before writing any. Reuse what's there
   (`loadCardHelpers` in `src/card-helpers.ts`, the helpers in
@@ -54,7 +54,7 @@ Claude's responsibility. Work like an owner:
 - `.github/workflows/` – build (typecheck, lint, formatting, build, test,
   artifact), release (manual button), labeler, HACS validation.
 - `dev/` – local Home Assistant in Docker for manual testing.
-- `images/` – README images, taken by Simen from the test dashboard (see
+- `images/` – README images, taken from the test dashboard (see
   `dev/README.md`): `main.png` (top: the card next to HA's vertical
   stack, Compare view) and `demo_1.png`–`demo_3.png` (one per example,
   Gallery and Basics views). The README's examples show the same cards as the views;
