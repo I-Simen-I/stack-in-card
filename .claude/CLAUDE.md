@@ -222,7 +222,8 @@ frontend repo (`home-assistant/frontend`), especially
   own stacks with the same cards) and Nested.
 - Overflow view: a picture, a history graph, a `select` row and
   `dev-popup-card` (an always open `position: absolute` menu, like custom
-  cards draw) next to HA's vertical stack, and a picture at the bottom: for
+  cards draw) next to HA's vertical stack, and pictures at the top (no
+  title) and bottom of a card: for
   clipped menus and the rounded corners.
 - The demo has only outdoor sensors; `configuration.yaml` adds template
   sensors `sensor.indoor_temperature` and `sensor.indoor_humidity` (fixed

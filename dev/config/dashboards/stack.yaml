@@ -150,6 +150,14 @@ views:
       - type: vertical-stack
         title: Home Assistant's vertical stack
         cards: *overflow
+      # No title, so the picture reaches the top corners
+      - type: custom:stack-in-card
+        cards:
+          - type: picture
+            image: /local/dev-picture.svg
+          - type: entities
+            entities:
+              - light.bed_light
       - type: custom:stack-in-card
         title: Picture at the bottom
         cards:
