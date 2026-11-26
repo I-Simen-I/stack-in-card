@@ -8,6 +8,8 @@ export interface HomeAssistant {
 
 export const MODES = ["vertical", "horizontal"] as const;
 
+export type Mode = (typeof MODES)[number];
+
 export interface LovelaceCardConfig {
   type: string;
   [key: string]: unknown;
@@ -28,6 +30,6 @@ export interface CardHelpers {
 export interface StackInCardConfig {
   type: string;
   title?: string;
-  mode?: (typeof MODES)[number];
+  mode?: Mode;
   cards: LovelaceCardConfig[];
 }

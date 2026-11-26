@@ -41,8 +41,9 @@ code itself is Claude's responsibility. Work like an owner:
 
 - `src/stack-in-card.ts` – the card. `src/editor.ts` – visual editor,
   imported by the card into the same bundle. `src/card-helpers.ts` – loads
-  `window.loadCardHelpers()` once. `src/types.ts` – config and the few Home
-  Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
+  `window.loadCardHelpers()` once. `src/config.ts` – the mode and the HA
+  stack config, shared by card and editor. `src/types.ts` – config and the
+  few Home Assistant types it uses. `src/declarations.d.ts` – `__VERSION__`.
 - No translation files: the editor's three labels come from Home
   Assistant's own translations (`hass.localize`), see `LABELS` in
   `src/editor.ts`.
@@ -139,6 +140,18 @@ Use these instead of doing the steps by hand; they hold the details.
   a title, so they follow the theme and a nested stack-in-card passes on
   the corners it got. Merged `ha-card`s use
   `border-radius: var(--ha-card-border-radius, 0px)`.
+- The card fills the height a sections dashboard gives it: `:host`,
+  `ha-card` and `.stack` are a `height: 100%` / flex column chain down to
+  the stack. In masonry views the heights stay auto.
+- Sizes of the cards inside (issue #4): the walk reads each card's own
+  `grid_options` from its `hui-card`'s `config` (`sizeOf`) and sets flex
+  weights (`setSize`), as nested-lovelace-card does: `columns` in a
+  horizontal stack (on the card, since `hui-card` is `display: contents`
+  there; cards without get 1), `rows` in a vertical one (on the `hui-card`;
+  cards without get `0 0 auto`, sized cards get `height: 100%`). Only when
+  a card in that stack sets a size, so stacks without stay as HA lays them
+  out. Non-numbers ("full", "auto") count as not set. Same code for both
+  directions and nested stacks; grids are left alone.
 - A nested `stack-in-card` gets its `ha-card` merged like any card, and
   merges its own cards.
 - Cards inside are created and rendered by Home Assistant as usual, with
@@ -225,6 +238,8 @@ frontend repo (`home-assistant/frontend`), especially
   cards draw) next to HA's vertical stack, and pictures at the top (no
   title) and bottom of a card: for
   clipped menus and the rounded corners.
+- Sections view (`type: sections`): widths from `columns`, heights from
+  `rows`, and a card filling its rows without sizes inside.
 - The demo has only outdoor sensors; `configuration.yaml` adds template
   sensors `sensor.indoor_temperature` and `sensor.indoor_humidity` (fixed
   values) for the living room card.
