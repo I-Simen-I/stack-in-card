@@ -6,7 +6,7 @@ body:
     id: problem
     attributes:
       label: What would you like to do?
-      description: The problem or use case, not only the solution. "I want the gap between two of the cards to stay" is more useful than "add a gap option".
+      description: The problem or use case, not only the solution. "I want my cards in two columns inside one card" is more useful than "add a grid mode".
     validations:
       required: true
 

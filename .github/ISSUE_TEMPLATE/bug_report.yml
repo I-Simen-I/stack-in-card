@@ -29,7 +29,7 @@ body:
     attributes:
       label: Card version
       description: Shown in the browser console (Stack In Card vX.Y.Z), or in the Marketplace/HACS.
-      placeholder: v0.3.0
+      placeholder: v1.0.0
     validations:
       required: true
 
